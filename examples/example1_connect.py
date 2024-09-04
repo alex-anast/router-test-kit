@@ -18,7 +18,11 @@ from src.device import LinuxDevice
 from src.connection import TelnetConnection
 
 
-def connect_to_device():
+def main():
+    """
+    Connect to a device using telnet, check status and disconnect.
+    Assert the connection status on the way.
+    """
     # Register a LinuxDevice object for the Ubuntu Server
     print("Registering device...")
     vm = LinuxDevice(username="user", password="user")
@@ -42,4 +46,4 @@ def connect_to_device():
 
 
 if __name__ == "__main__":
-    connect_to_device()
+    main()
