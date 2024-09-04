@@ -41,7 +41,6 @@ finished_header = False
 
 
 def print_help():
-    # TODO: Change this at the end
     print()
     print("Usage: test_offline_vm.sh -a <linux ip address VM_A> -b <linux ip address VM_B>[<list of tests>]")
     print()

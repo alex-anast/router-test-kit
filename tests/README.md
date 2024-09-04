@@ -44,7 +44,7 @@
 | | `generic` dynamic ikev2 tunnel - no cfg exchange request - radius                            | setup37 |
 | | `generic` dynamic ikev2 tunnel - address from address pool - radius                          | setup38 |
 | | `generic` dynamic ikev2 tunnel - radius - dynamic template                                   | setup39 |
-| | `algorithms` BASIC TEST ON ALGORITHMS (keep capitalized as remainder to change in the future)| setup1  |
+| | `algorithms` basic test on algorithms                                                        | setup1  |
 
 ## How to Test
 
