@@ -5,8 +5,6 @@ File: example1_connect.py
 
 This example assumes there is an Ubuntu Server VM up and running.
 See the README for specific details regarding the setup.
-
-TODO
 """
 
 import sys

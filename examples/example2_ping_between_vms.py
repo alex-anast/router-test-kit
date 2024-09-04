@@ -5,8 +5,6 @@ File: example2_ping_between_vms.py
 
 This example assumes there are two Ubuntu Server VMs up and running.
 See the README for specific details regarding the setup.
-
-TODO
 """
 
 import sys
