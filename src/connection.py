@@ -23,12 +23,16 @@ import logging
 import re
 import socket
 import time
+import sys
+import os
 from abc import ABC, abstractmethod
 from typing import Optional, List, Union
 
 import telnetlib
 
-from device import Device
+# Add the root directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from src.device import Device
 
 
 logger = logging.getLogger(__name__)

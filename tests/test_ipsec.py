@@ -628,7 +628,7 @@ def setup_connection(setup_info: Tuple[str, str], vm_nbr: int, check_is_empty=Tr
         raise ValueError("Invalid vm_nbr")
     vm_name = "VM_" + chr(64 + vm_nbr)
 
-    # Skip cases where VM_C and VM_D are not expected. Assume that JSON doens't provide config for them
+    # Skip cases where VM_C and VM_D are not expected. Assume that JSON doesn't provide config for them
     test_name, setup_marker = setup_info
     config_for_vm_doesnt_exist = (json_config[test_name][setup_marker].get(vm_name) is None)
     if config_for_vm_doesnt_exist:

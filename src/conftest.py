@@ -2,6 +2,7 @@
 
 
 import os
+import sys
 import re
 import json
 import getpass
@@ -10,7 +11,9 @@ from typing import List, Tuple
 
 import pytest
 
-from static_utils import print_banner, load_json
+# Add the root directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from src.static_utils import print_banner, load_json
 
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))

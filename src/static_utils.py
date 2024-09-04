@@ -4,12 +4,16 @@ import time
 import logging
 import subprocess
 import ipaddress
+import sys
+import os
 from typing import List, Optional, Tuple
 
 import pytest
 
-from device import HostDevice
-from connection import TelnetConnection
+# Add the root directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from src.device import HostDevice
+from src.connection import TelnetConnection
 
 logger = logging.getLogger(__name__)
 
