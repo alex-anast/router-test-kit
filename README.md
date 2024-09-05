@@ -124,7 +124,7 @@ For more complete examples, see:
 
 For a very detailed, but not executable example, see:
 
-- [test_ipsec.py](./examples/test_ipsec.py)
+- [test_ipsec.py](./tests/test_ipsec.py)
 
 ## License
 
