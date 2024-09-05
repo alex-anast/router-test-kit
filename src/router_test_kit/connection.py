@@ -32,7 +32,7 @@ import telnetlib
 
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from src.device import Device
+from router_test_kit.device import Device
 
 
 logger = logging.getLogger(__name__)

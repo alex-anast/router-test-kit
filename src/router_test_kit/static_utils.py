@@ -12,8 +12,8 @@ import pytest
 
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from src.device import HostDevice
-from src.connection import TelnetConnection
+from router_test_kit.device import HostDevice
+from router_test_kit.connection import TelnetConnection
 
 logger = logging.getLogger(__name__)
 
