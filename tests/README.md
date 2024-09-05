@@ -28,10 +28,14 @@ Pytest is a famous testing framework in Python, used to run the IPSEC tests here
 
 Such examples can be found at the bottom of the file `./test_ipsec.py`. In short, these are pytest-compatible eligible options:
 
-- `python3 -m pytest -m ipsec -k "generic and setup1-"  # Will execute setup1 from Generic group`
-- `python3 -m pytest -m ipsec -k "setup1-"  # Will execute setup1 from both Generic and Algorithms group`
-- `python3 -m pytest -m ipsec -k "not vm_c and not orange"`
-  `# Will execute all tests that don't require vm_c and orange keywords (see JSON)`
+- Execute setup1 from Generic group:
+  `python3 -m pytest -m ipsec -k "generic and setup1-"`
+
+- Execute setup1 from both Generic and Algorithms group:
+  `python3 -m pytest -m ipsec -k "setup1-"`
+
+- Execute all tests that don't require vm_c and orange keywords (see JSON)
+  `python3 -m pytest -m ipsec -k "not vm_c and not orange"`
 
 ### Design of test_ipsec.py
 
@@ -39,7 +43,7 @@ It contains the tests for IPSEC. It is divided into two categories: `generic` an
 
 The tests can be run on both actual devices and virtual machines. All the tests care about is the IPs to be reachable. Some tests are using a radius server, others require some modifications on the network interfaces of the connected device etc.
 
-Appart from the two main functions, searched by pytest, `test_ipsec_generic` and `test_ipsec_algorithms`, several more have been written:
+Apart from the two main functions, searched by pytest, `test_ipsec_generic` and `test_ipsec_algorithms`, several more have been written:
 
 1. Several `assert` functions that wrap the `assert` keyword in Python. They are used to check the output of the commands run on the devices.
 2. Functions starting with `_` are meant to be used only within other helper functions.
