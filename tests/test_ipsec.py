@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-File: test_ipsec.py
+File: test_ipsec.py (OLD VERSION)
 
 This file contains tests for the IPSEC functionality.
 Each test function in this module tests a specific aspect of the IPSEC functionality.
@@ -32,11 +32,14 @@ from typing import Optional, Dict, List, Tuple, Set
 
 import pytest
 
-import static_utils
-from device import OneOS6Device, RADIUSServer
-from connection import TelnetConnection
+# Add the root directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+import src.static_utils
+from src.device import OneOS6Device, RADIUSServer
+from src.connection import TelnetConnection
 from conftest import RED, GREEN, YELLOW, NC, OK, NOK, SKIPPED  # Colouring
-from conftest import ROOT_PATH, IPSEC_CFG_DIR_NAME, IPSEC_JSON_NAME, SHOW_CRYPTO_DIR, BSA_DIR, RADIUS_CFG_DIR_NAME  # Paths and file names
+from conftest import ROOT_PATH, IPSEC_CFG_DIR_NAME, IPSEC_JSON_NAME
+from conftest import SHOW_CRYPTO_DIR, BSA_DIR, RADIUS_CFG_DIR_NAME  # Paths and file names
 from conftest import TEST_SETUPS_GENERIC, TEST_SETUPS_ALGORITHMS, json_config  # Info from JSON
 
 
@@ -48,7 +51,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_GENERIC)
 def test_ipsec_generic(setup_marker: str, description: str, keywords: List[str], sudo_password) -> None:
-    static_utils.print_banner(f"GENERIC - {setup_marker.upper()}", description)
+    src.static_utils.print_banner(f"GENERIC - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_generic.__name__, setup_marker)
     local_radius_connection_used = None
 
@@ -105,7 +108,7 @@ def test_ipsec_generic(setup_marker: str, description: str, keywords: List[str],
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_ALGORITHMS)
 def test_ipsec_algorithms(setup_marker: str, description: str, keywords: List[str], sudo_password) -> None:
-    static_utils.print_banner(f"ALGORITHMS - {setup_marker.upper()}", description)
+    src.static_utils.print_banner(f"ALGORITHMS - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_algorithms.__name__, setup_marker)
 
     intf_info = setup_interfaces(sudo_password)
@@ -166,11 +169,11 @@ def _get_radius_connection_ok(radius_preference: str) -> str:
         return status
 
     radius_ip = json_config["RADIUS"][radius_preference]["radius_ip"]
-    if not static_utils.is_valid_ip(radius_ip):
+    if not src.static_utils.is_valid_ip(radius_ip):
         logger.critical(f"{RED}RADIUS IP: {radius_ip}{NC}")
         return "RADIUS_IP_NOT_VALID"
 
-    ping_packet_loss = static_utils.get_packet_loss(static_utils.ping(radius_ip, count=2))
+    ping_packet_loss = src.static_utils.get_packet_loss(src.static_utils.ping(radius_ip, count=2))
     if ping_packet_loss == "100" or ping_packet_loss is None or ping_packet_loss == "":
         return "RADIUS_NOT_RESPONDING"
     return "OK"
@@ -330,7 +333,7 @@ def assert_data_test(nbr_packets_expected: int, test_commands: List[str], setup_
     logger.info("Starting Data Test...")
     # The first execution of the script is for setup purposes, results are not relevant.
     logger.debug("Sending traffic for the First Time")
-    static_utils.execute_shell_commands_on_host(test_commands, quiet=True)
+    src.static_utils.execute_shell_commands_on_host(test_commands, quiet=True)
     sleep(3)
     for connection in connections:
         connection.clear_crypto_counters()
@@ -489,10 +492,10 @@ def cleanup_interfaces(password, interface_info: List[Dict[str, str]]) -> None:
             intf_name = interface["name"]
             if "ip" in interface:
                 intf_ip = interface["ip"]
-                static_utils.del_interface_ip(intf_name, intf_ip, password)
+                src.static_utils.del_interface_ip(intf_name, intf_ip, password)
             elif "ipv6" in interface:
                 intf_ip = interface["ipv6"]
-                static_utils.del_interface_ip(intf_name, intf_ip, password, 64)
+                src.static_utils.del_interface_ip(intf_name, intf_ip, password, 64)
             else:
                 logger.error(f"No 'ip' or 'ipv6' key found in interface dictionary.")
                 raise KeyError
@@ -510,7 +513,7 @@ def cleanup_radius(connection: TelnetConnection) -> None:
 
 
 def get_successful_pings(commands: List[str]) -> int:
-    response = static_utils.execute_shell_commands_on_host(commands, quiet=False)
+    response = src.static_utils.execute_shell_commands_on_host(commands, quiet=False)
     return sum("bytes from" in line for line in response.split('\n'))
 
 
@@ -658,7 +661,7 @@ def setup_connection(setup_info: Tuple[str, str], vm_nbr: int, check_is_empty=Tr
     if patch is not None:
         connection.patch_config(os.path.join(cfg_dir_path, BSA_DIR, patch))
 
-    # connection = static_utils.reboot_device(connection) if REBOOT_FLAG else connection
+    # connection = src.static_utils.reboot_device(connection) if REBOOT_FLAG else connection
     return connection
 
 
@@ -690,13 +693,13 @@ def setup_interfaces(password: str) -> List[Dict[str, str]]:
     for _, interface in json_config["HOST"]["interfaces"].items():
         ip = interface.get("ip", "")
         if ip:
-            static_utils.set_interface_ip(interface["name"], interface["ip"], password)
+            src.static_utils.set_interface_ip(interface["name"], interface["ip"], password)
             logger.info(f'IP {interface["ip"]} added to interface {interface["name"]}')
             interface_info.append({"name": interface["name"], "ip": interface["ip"]})
 
         ipv6 = interface.get("ipv6", "")
         if ipv6:
-            static_utils.set_interface_ip(interface["name"], interface["ipv6"], password, netmask="64")
+            src.static_utils.set_interface_ip(interface["name"], interface["ipv6"], password, netmask="64")
             logger.info(f'IP {interface["ipv6"]} added to interface {interface["name"]}')
             interface_info.append({"name": interface["name"], "ipv6": interface["ipv6"]})
 
@@ -729,13 +732,13 @@ def setup_radius(setup_info: Tuple[str, str]) -> TelnetConnection:
         # Move the config files to the RADIUS server
         user = json_config["RADIUS"]["local"]["username"]
         password = json_config["RADIUS"]["local"]["password"]
-        static_utils.scp_file_to_home_dir(
+        src.static_utils.scp_file_to_home_dir(
             local_file_path  = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "authorize"),
             user_at_ip       = user + "@" + json_config["RADIUS"]["local"]["ip"],  # i.e. user@X.X.X.X
             password         = password,
         )
         connection_to_radius.write_command(f"mv /home/{user}/authorize /etc/freeradius/3.0/mods-config/files/authorize")
-        static_utils.scp_file_to_home_dir(
+        src.static_utils.scp_file_to_home_dir(
             local_file_path  = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "clients.conf"),
             user_at_ip       = user + "@" + json_config["RADIUS"]["local"]["ip"],
             password         = password,
@@ -760,7 +763,7 @@ def is_radius_installed(connection: TelnetConnection) -> bool:
 def is_radius_active(connection: TelnetConnection) -> bool:
     connected_to_internet = False
     for _ in range (3):
-        if static_utils.get_packet_loss(connection.ping("8.8.8.8", nbr_packets=3)) == "0":
+        if src.static_utils.get_packet_loss(connection.ping("8.8.8.8", nbr_packets=3)) == "0":
             connected_to_internet = True
             break
     if not connected_to_internet:
