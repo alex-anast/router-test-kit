@@ -28,6 +28,9 @@ For a thorough documentation (incomplete), see here: [alex-anast.github.io/route
 
 ## Demo
 
+[![Watch the video](https://img.youtube.com/vi/sNybO2tVy_w/0.jpg)](https://www.youtube.com/watch?v=sNybO2tVy_w)
+
+
 ## Description
 
 Virtual Router Test Kit is a Python framework for testing routers. It is based on a telnet connection (py-package: `telnetlib`). The framework is designed to be simple and easy to use, with a focus on the most common operations that are performed on a router.
