@@ -18,7 +18,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="router-test-kit",
-    version="0.1.2",
+    version="0.1.3",
     author="Alexandros Anastasiou, alex-anast",
     author_email="anastasioyaa@gmail.com",
     description="A framework for remotely testing routers, physical or virtual.",
