@@ -6,10 +6,13 @@ For a thorough documentation (incomplete), see here: [alex-anast.github.io/route
 
 ## Badges
 
-![PyPI version](https://img.shields.io/pypi/v/router-test-kit)
-![License](https://img.shields.io/github/license/alex-anast/router-test-kit)
-![PyPI status](https://img.shields.io/pypi/status/router-test-kit)
-![Dependencies](https://img.shields.io/librariesio/github/alex-anast/router-test-kit)
+- ![PyPI version](https://img.shields.io/pypi/v/router-test-kit)
+
+- ![License](https://img.shields.io/github/license/alex-anast/router-test-kit)
+
+- ![PyPI status](https://img.shields.io/pypi/status/router-test-kit)
+
+- ![Dependencies](https://img.shields.io/librariesio/github/alex-anast/router-test-kit)
 
 ## Table of Contents
 
