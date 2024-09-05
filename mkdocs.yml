@@ -1,0 +1,6 @@
+site_name: Router Test Kit
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+theme: readthedocs

@@ -1,8 +1,9 @@
-# Virtual Router Test Kit
+# Router Test Kit
 
-The motivation for this project is to provide a simple and easy to use framework for testing virtual routers. Initially, the framework was designed to work with OneOS6 routers from OneAccess Networks. It is based on a telnet connection, therefore it is compatible with CISCO routers, Ubuntu Server images etc.
+The motivation for this project is to provide a simple and out-of-the-box, easy-to-use framework for testing (virtual) routers. Initially, the framework was designed to work with OneOS6 routers from OneAccess Networks. It is based on a telnet connection, therefore it is compatible with CISCO routers, Ubuntu Server images etc.
 
-For a thorough documentation, please refer to: TODO: mkdocs
+For a thorough documentation, incomplete effort has been made using `mkdocs`.
+To see the docs, run `mkdocs serve` in the root directory of the project and navigate to `http://localhost:8000`.
 
 ## Badges
 
@@ -11,7 +12,7 @@ For a thorough documentation, please refer to: TODO: mkdocs
 
 ## Table of Contents
 
-- [Virtual Router Test Kit](#virtual-router-test-kit)
+- [Router Test Kit](#router-test-kit)
   - [Badges](#badges)
   - [Table of Contents](#table-of-contents)
   - [Demo](#demo)

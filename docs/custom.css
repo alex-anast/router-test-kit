@@ -1,0 +1,4 @@
+html {
+    transform: scale(1.5);  /* Adjust the scale factor to 1.5x (150%) */
+    transform-origin: 0 0;
+}
