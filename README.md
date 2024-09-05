@@ -2,11 +2,11 @@
 
 The motivation for this project is to provide a simple and out-of-the-box, easy-to-use framework for testing (virtual) routers. Initially, the framework was designed to work with OneOS6 routers from OneAccess Networks. It is based on a telnet connection, therefore it is compatible with CISCO routers, Ubuntu Server images etc.
 
-For a thorough documentation, incomplete effort has been made using `mkdocs`.
-To see the docs, run `mkdocs serve` in the root directory of the project and navigate to `http://localhost:8000`.
+For a thorough documentation (incomplete), see here: [alex-anast.github.io/router-test-kit](https://alex-anast.github.io/router-test-kit/)
 
 ## Badges
 
+TODO
 ![Build Status](https://img.shields.io/github/actions/workflow/status/username/repo/main.yml?branch=main)
 ![License](https://img.shields.io/github/license/username/repo)
 
