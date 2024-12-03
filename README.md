@@ -2,7 +2,7 @@
 
 The motivation for this project is to provide a simple and out-of-the-box, easy-to-use framework for testing (virtual) routers. Initially, the framework was designed to work with OneOS6 routers from OneAccess Networks. It is based on a telnet connection, therefore it is compatible with CISCO routers, Ubuntu Server images etc.
 
-For a thorough documentation (incomplete), see here: [alex-anast.github.io/router-test-kit](https://alex-anast.github.io/router-test-kit/)
+For a thorough documentation (incomplete), see here: [alex-anast.com/router-test-kit](https://alex-anast.com/router-test-kit/)
 
 ## Badges
 
