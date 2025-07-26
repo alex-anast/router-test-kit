@@ -129,6 +129,40 @@ For a very detailed, but not executable example, see:
 
 - [test_ipsec.py](./tests/test_ipsec.py)
 
+## Future TODOs
+
+Here is a list of suggestions for improving the project, categorized by area.
+
+### Project Structure & Dependencies
+
+*   **Consolidate Project Configuration**: Currently, the project might have `setup.py`, and `pyproject.toml`. It would be beneficial to consolidate all project metadata into `pyproject.toml` and remove `setup.py` if possible. This aligns with modern Python packaging standards (PEP 621).
+*   **Use a Modern Build Backend**: Switch from a `setup.py`-based build to a `pyproject.toml`-native build backend like `setuptools` (without `setup.py`), `flit`, or `poetry`.
+*   **Use `pathlib` for Path Manipulation**: The `os.path` module is used for path manipulation. It would be more modern and object-oriented to refactor this to use the `pathlib` module instead.
+
+### Code & API
+
+*   **Replace Telnet with a more secure protocol**: The current implementation uses `telnetlib`, which is insecure. A major improvement would be to add support for SSH using a library like `paramiko` or `asyncssh`. The `Connection` class could be refactored to support different connection backends.
+*   **Improve `run_shell_command`**: The `HostDevice.write_command` and `execute_shell_commands_on_host` in `static_utils.py` can be improved to use `subprocess.run` instead of `subprocess.Popen` for simpler usage and better error handling.
+*   **Improve `TelnetConnection`**: The `TelnetConnection` class in `connection.py` can be refactored to use a more robust Telnet library, such as `telnetlib3`, which supports async operations, making the framework more efficient for handling multiple connections.
+
+### Testing
+
+*   **Add Unit Tests**: The project currently only has integration tests. It would be beneficial to add unit tests for the `static_utils.py` and `connection.py` modules. This would allow for more granular testing and faster feedback.
+*   **Use `pytest` Fixtures more extensively**: The tests in `test_ipsec.py` can be refactored to better use `pytest` fixtures for setting up and tearing down test resources (like connections and device configurations). This would make the tests more modular and easier to maintain.
+*   **Improve Test Coverage**: The test suite can be expanded to cover more of the codebase. Tools like `coverage.py` can be used to measure test coverage and identify untested code.
+*   **Use `pytest-xdist`**: The `pytest-xdist` plugin can be used to run tests in parallel, which can significantly reduce test execution time, especially for I/O-bound integration tests.
+
+### Documentation
+
+*   **Update `README.md`**: The `README.md` file should be kept up-to-date to reflect the changes made to the project.
+*   **Improve `docs/`**: The documentation in the `docs/` directory can be improved to be more comprehensive and to include examples of how to use the library.
+*   **Use a Documentation Generator**: A documentation generator like `Sphinx` can be used to generate professional-looking HTML documentation from the docstrings in the code. This would make it easier to keep the documentation up-to-date.
+
+### CI/CD
+
+*   **Add a CI Pipeline**: A CI pipeline (e.g., using GitHub Actions) can be set up to automatically run tests and linters on every push and pull request. This would help to ensure that the codebase is always in a good state.
+*   **Use `pre-commit`**: The `pre-commit` framework can be used to run linters (like `ruff`, `black`, `mypy`) and other checks before each commit. This would help to catch errors early and to maintain a consistent code style.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
