@@ -1,0 +1,98 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security-scan:
+    name: Security Dependency Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+        
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install safety bandit pip-audit
+        
+    - name: Run safety check
+      run: |
+        echo "Running Safety check for known vulnerabilities..."
+        safety check --output text --file requirements.txt || true
+        
+    - name: Run pip audit
+      run: |
+        echo "Running pip-audit for additional vulnerability checks..."
+        pip-audit --output=text || true
+        
+    - name: Run bandit security scan
+      run: |
+        echo "Running Bandit static security analysis..."
+        bandit -r src/ -f txt || true
+
+  compatibility-check:
+    name: Python Version Compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Test installation
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: Test basic imports
+      run: |
+        python -c "import router_test_kit; print('✅ Basic import successful')"
+        python -c "from router_test_kit.connection import Connection; print('✅ Connection import successful')"
+        python -c "from router_test_kit.device import Device; print('✅ Device import successful')"
+        python -c "from router_test_kit.static_utils import print_banner; print('✅ Utils import successful')"
+        echo "✅ Python ${{ matrix.python-version }} compatibility check passed"
+
+  outdated-packages:
+    name: Check Outdated Packages
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+    - name: Check for outdated packages
+      run: |
+        echo "📦 Checking for outdated packages..."
+        pip list --outdated || echo "No outdated packages or pip list failed"

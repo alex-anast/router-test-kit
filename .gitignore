@@ -160,3 +160,39 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Security and credentials
+*.key
+*.pem
+.ssh/
+credentials.json
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Ruff cache
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Network device configurations
+*.cfg
+test_configs/
+device_backups/
+
+# Test artifacts
+*.pcap
+test_results/
+benchmark_results/

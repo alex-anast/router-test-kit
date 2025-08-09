@@ -1,21 +1,42 @@
-# connection.py
+"""Network Connection Management Module.
 
+This module provides a comprehensive framework for establishing and managing
+network connections to remote devices, with support for both secure SSH and
+legacy Telnet protocols.
 
-"""
-This module contains the implementation for establishing and managing
-    network connections between devices.
-    Connection class contains the core actions of the connection,
-    while TelnetConnection and TelnetCLIConnection have to do with how the connection is established.
+The module implements a connection hierarchy with an abstract base class and
+concrete implementations for different connection types:
 
-TelnetConnection: Connection originating from the host device to another device.
-                  Creates, initialises and uses a Telnet object from telnetlib library.
+- Connection (ABC): Abstract base class defining the connection interface
+- SSHConnection: Secure SSH connections using paramiko (recommended)
+- TelnetConnection: Legacy telnet connections (deprecated)
 
-TelnetCLIConnection: Connection originating from an already connected device to another device.
-                     Uses the Telnet object from the TelnetConnection to connect to the next device.
-                     This class requires that already-connected Telnet object
-                         in order to be instantiated and used.
-                     If established, the base connection is not available for use by other connections,
-                         until the TelnetCLIConnection is closed.
+Classes:
+    Connection: Abstract base class for all connection types
+    SSHConnection: Secure SSH connection implementation
+    TelnetConnection: Legacy telnet connection (deprecated)
+
+Example:
+    Basic SSH connection usage:
+    
+    ```python
+    from router_test_kit.connection import SSHConnection
+    from router_test_kit.device import LinuxDevice
+    
+    # Create device and connection
+    device = LinuxDevice(username="admin", password="password")
+    conn = SSHConnection(timeout=30)
+    
+    # Connect and execute commands
+    conn.connect(device, "192.168.1.1")
+    result = conn.write_command("show version")
+    conn.disconnect()
+    ```
+
+Security Notice:
+    This module includes deprecated telnet functionality for backward compatibility.
+    All new implementations should use SSHConnection for secure communications.
+    Telnet support will be removed in a future major version.
 """
 
 import logging
@@ -39,7 +60,44 @@ logger = logging.getLogger(__name__)
 
 
 class Connection(ABC):
+    """Abstract base class for network connections to remote devices.
+    
+    This class defines the interface that all connection implementations must follow.
+    It provides common functionality for connection management including timeout handling,
+    device association, and connection state tracking.
+    
+    The class includes decorators for ensuring connection exclusivity and device type
+    validation, which are used by concrete implementations.
+    
+    Attributes:
+        destination_device (Optional[Device]): The target device for this connection
+        destination_ip (Optional[str]): IP address of the destination device
+        timeout (int): Connection timeout in seconds (default: 10)
+        prompt_symbol (Optional[str]): Expected command prompt symbol
+        
+    Private Attributes:
+        _is_occupied (bool): Indicates if connection is in use by another process
+        
+    Example:
+        This is an abstract class and cannot be instantiated directly.
+        Use concrete implementations like SSHConnection:
+        
+        ```python
+        conn = SSHConnection(timeout=30)
+        conn.connect(device, "192.168.1.1")
+        ```
+    """
+    
     def __init__(self, timeout: int = 10):
+        """Initialize a new connection instance.
+        
+        Args:
+            timeout: Connection timeout in seconds. Defaults to 10.
+            
+        Note:
+            This is an abstract class and should not be instantiated directly.
+            Use concrete implementations like SSHConnection or TelnetConnection.
+        """
         self.destination_device = None
         self.destination_ip = None
         self.resulting_telnet_connection = None
@@ -51,10 +109,35 @@ class Connection(ABC):
 
     @abstractmethod
     def connect(self, destination_device: "Device", destination_ip: str) -> "Connection":
+        """Establish a connection to the specified device.
+        
+        This method must be implemented by concrete connection classes to establish
+        the actual network connection to the target device.
+        
+        Args:
+            destination_device: The device object containing connection credentials
+            destination_ip: IP address of the target device
+            
+        Returns:
+            Connection: This connection instance for method chaining
+            
+        Raises:
+            ConnectionAbortedError: If the connection cannot be established
+            TimeoutError: If the connection attempt times out
+        """
         pass
 
     @abstractmethod
     def disconnect(self) -> None:
+        """Close the connection to the remote device.
+        
+        This method must be implemented by concrete connection classes to properly
+        close and clean up the network connection.
+        
+        Note:
+            After calling this method, the connection object should not be used
+            for further communication until connect() is called again.
+        """
         pass
 
     def check_occupied(func):

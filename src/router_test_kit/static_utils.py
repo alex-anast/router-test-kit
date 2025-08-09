@@ -1,3 +1,57 @@
+"""Static Utilities and Helper Functions Module.
+
+This module provides a collection of utility functions for network testing,
+command execution, and system operations. It includes functions for:
+
+- Network operations (ping, packet loss analysis, IP validation)
+- File operations (JSON loading, SCP transfers)
+- System commands (shell command execution)  
+- Test utilities (pytest integration, data processing)
+
+The utilities are designed to support router and network device testing
+scenarios, providing common operations needed across different test cases.
+
+Functions:
+    Network Utilities:
+    - ping(): Execute ping commands and return results
+    - get_packet_loss(): Extract packet loss percentage from ping output
+    - is_valid_ip(): Validate IP address strings (IPv4/IPv6)
+    - get_interface_ips(): Get IP addresses assigned to network interfaces
+    
+    System Utilities:
+    - execute_shell_commands_on_host(): Execute shell commands with error handling
+    - scp_file_to_home_dir(): Transfer files using SCP
+    
+    Data Utilities:
+    - load_json(): Load and parse JSON configuration files
+    - print_banner(): Print formatted banner messages
+    
+    Test Utilities:
+    - get_tests(): Collect pytest test items
+    - TestCollector: Pytest plugin for test collection
+
+Example:
+    Common usage patterns:
+    
+    ```python
+    from router_test_kit.static_utils import ping, get_packet_loss, is_valid_ip
+    
+    # Network testing
+    result = ping("8.8.8.8", count=3)
+    loss = get_packet_loss(result)
+    print(f"Packet loss: {loss}%")
+    
+    # IP validation  
+    if is_valid_ip("192.168.1.1"):
+        print("Valid IP address")
+    ```
+
+Note:
+    Many functions in this module execute system commands or access network
+    resources. Ensure proper permissions and network connectivity when using
+    these utilities in test environments.
+"""
+
 import ipaddress
 import json
 import logging
@@ -49,8 +103,34 @@ def load_json(file_path: str) -> Dict[str, Any]:
     return data
 
 
-def print_banner(*messages: str, banner_legth=80) -> None:
-    """Prints a banner out of any number of messages."""
+def print_banner(*messages: str, banner_legth: int = 80) -> None:
+    """Print formatted banner messages with decorative borders.
+    
+    Creates a visually appealing banner by surrounding the provided messages
+    with asterisk borders. Each message is centered within the banner width.
+    
+    Args:
+        *messages: Variable number of string messages to display in the banner
+        banner_legth: Width of the banner in characters. Defaults to 80.
+        
+    Example:
+        ```python
+        print_banner("Welcome", "Router Test Suite", "Version 1.0")
+        ```
+        
+        Output:
+        ```
+        ********************************************************************************
+                                        Welcome
+                                   Router Test Suite
+                                      Version 1.0
+        ********************************************************************************
+        ```
+        
+    Note:
+        Messages are logged using the logger.info() method, so they will appear
+        in both console output and log files based on logging configuration.
+    """
     border = "*" * banner_legth
     logger.info(border)
     for message in messages:
