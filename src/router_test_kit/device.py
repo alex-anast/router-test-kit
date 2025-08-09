@@ -10,7 +10,7 @@ Actions do not originate from the device.
 
 import logging
 import subprocess
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -27,6 +27,11 @@ class Device(ABC):
         _type (str): The type of the device. Default is "device".
     """
 
+    # Default values to be overridden by subclasses
+    DEFAULT_USERNAME: str = ""
+    DEFAULT_PASSWORD: str = ""
+    DEFAULT_PROMPT_SYMBOL: str = ""
+
     def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
         self.username = username
         self.password = password
@@ -36,21 +41,6 @@ class Device(ABC):
     @property
     def type(self) -> str:
         return self._type
-
-    @property
-    @abstractmethod
-    def DEFAULT_USERNAME(self):
-        pass
-
-    @property
-    @abstractmethod
-    def DEFAULT_PASSWORD(self):
-        pass
-
-    @property
-    @abstractmethod
-    def DEFAULT_PROMPT_SYMBOL(self):
-        pass
 
 
 class LinuxDevice(Device):
@@ -93,21 +83,52 @@ class OneOS6Device(Device):
 
 class HostDevice:
     @staticmethod
-    def write_command(command: str, print_response=False, quiet=False) -> Optional[str]:
-        process = subprocess.Popen(
-            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        stdout, stderr = process.communicate()
+    def write_command(command: str, print_response: bool = False, quiet: bool = False) -> Optional[str]:
+        """
+        Execute a command on the local host system.
+        
+        Args:
+            command: The command to execute
+            print_response: Whether to log successful command execution
+            quiet: Whether to suppress error logging
+            
+        Returns:
+            Command output if successful, None otherwise
+        """
+        try:
+            result = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False  # Don't raise exception on non-zero exit
+            )
 
-        responses = []
-        if process.returncode != 0 and not quiet:
-            logger.error(f"Error executing command: {command}")
-            logger.error(f"Error message: {stderr.decode()}")
-        else:
-            response = stdout.decode()
+            if result.returncode != 0:
+                if not quiet:
+                    logger.error("Error executing command: %s", command)
+                    logger.error("Error message: %s", result.stderr)
+                return None
+
             if print_response and not quiet:
-                logger.debug(f"Command executed successfully: {command}")
-                logger.debug(f"Output: {response}")
-        responses.append(stdout.decode()) if stdout else None
-        responses.append(stderr.decode()) if stderr else None
-        return "\n".join(responses) if responses else None
+                logger.debug("Command executed successfully: %s", command)
+                logger.debug("Output: %s", result.stdout)
+
+            # Return combined output (stdout + stderr) if available
+            output_parts = []
+            if result.stdout:
+                output_parts.append(result.stdout)
+            if result.stderr:
+                output_parts.append(result.stderr)
+
+            return "\n".join(output_parts) if output_parts else None
+
+        except subprocess.TimeoutExpired:
+            if not quiet:
+                logger.error("Command timed out: %s", command)
+            return None
+        except OSError:
+            if not quiet:
+                logger.exception("Failed to execute command: %s", command)
+            return None

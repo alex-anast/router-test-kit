@@ -1,12 +1,12 @@
 # conftest.py
 
 
-import os
-import sys
-import re
-import json
 import getpass
+import json
 import logging
+import os
+import re
+import sys
 from typing import List, Tuple
 
 import pytest
@@ -14,8 +14,7 @@ import pytest
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 # Updated import paths for new package structure
-from router_test_kit.static_utils import print_banner, load_json
-
+from router_test_kit.static_utils import load_json, print_banner
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 IPSEC_CFG_DIR_NAME = "configs_ipsec"

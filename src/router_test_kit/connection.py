@@ -25,8 +25,11 @@ import socket
 import sys
 import telnetlib
 import time
+import warnings
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union
+
+import paramiko
 
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
@@ -47,11 +50,11 @@ class Connection(ABC):
         self.prompt_symbol = None
 
     @abstractmethod
-    def connect():
+    def connect(self, destination_device: "Device", destination_ip: str) -> "Connection":
         pass
 
     @abstractmethod
-    def disconnect():
+    def disconnect(self) -> None:
         pass
 
     def check_occupied(func):
@@ -624,14 +627,235 @@ class Connection(ABC):
         logger.info("Device reconfigured")
 
 
-class TelnetConnection(Connection):
+class SSHConnection(Connection):
     """
-    Represents a Telnet connection, always originating from the Host device to another device.
-    It uses the telnetlib library to establish and manage the connection.
+    Represents a secure SSH connection to a remote device.
+    This is the recommended secure alternative to TelnetConnection.
+    
+    Uses the paramiko library to establish and manage secure SSH connections.
+    Supports both password authentication and key-based authentication.
     """
 
     def __init__(self, timeout: int = 10):
         super().__init__(timeout)
+        self.ssh_client: Optional[paramiko.SSHClient] = None
+        self.ssh_channel: Optional[paramiko.Channel] = None
+
+    @Connection.check_occupied
+    def connect(self, destination_device: "Device", destination_ip: str) -> "Connection":
+        """
+        Establishes an SSH connection to the destination device.
+        
+        Args:
+            destination_device (Device): The device object containing credentials
+            destination_ip (str): The IP address of the destination device
+            
+        Returns:
+            Connection: This connection object for method chaining
+            
+        Raises:
+            ConnectionAbortedError: If the SSH connection could not be established
+        """
+        self.prompt_symbol = destination_device.DEFAULT_PROMPT_SYMBOL
+        self.destination_device = destination_device
+        self.destination_ip = destination_ip
+
+        try:
+            # Create SSH client
+            self.ssh_client = paramiko.SSHClient()
+            self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            # Connect to the device
+            self.ssh_client.connect(
+                hostname=destination_ip,
+                username=destination_device.username,
+                password=destination_device.password,
+                timeout=self.timeout,
+                look_for_keys=False,  # Don't look for SSH keys unless specifically configured
+                allow_agent=False     # Don't use SSH agent
+            )
+
+            # Create an interactive shell channel
+            self.ssh_channel = self.ssh_client.invoke_shell()
+            self.ssh_channel.settimeout(self.timeout)
+
+            # Wait for initial prompt and flush any welcome messages
+            time.sleep(0.5)  # Give device time to send welcome message
+            self._flush_channel()
+
+            if not self.is_connected:
+                raise ConnectionAbortedError("SSH connection established but channel failed")
+
+            logger.info(f"SSH connected to {self.destination_device.hostname} at {self.destination_ip}")
+            return self
+
+        except Exception as e:
+            if self.ssh_client:
+                self.ssh_client.close()
+            raise ConnectionAbortedError(f"SSH connection failed: {str(e)}") from e
+
+    def _flush_channel(self) -> None:
+        """Flush any pending data from the SSH channel."""
+        if self.ssh_channel and self.ssh_channel.recv_ready():
+            try:
+                self.ssh_channel.recv(4096)
+            except socket.timeout:
+                pass  # Expected when no data available
+
+    @Connection.check_occupied
+    def disconnect(self) -> None:
+        """Closes the SSH connection and channel."""
+        if self.ssh_channel:
+            self.ssh_channel.close()
+            self.ssh_channel = None
+
+        if self.ssh_client:
+            self.ssh_client.close()
+            self.ssh_client = None
+
+        if self.is_connected:
+            raise ConnectionError("SSH connection could not be closed")
+
+        logger.info(f"SSH disconnected from {self.destination_device.hostname} at {self.destination_ip}")
+
+    @property
+    def is_connected(self) -> bool:
+        """Check if the SSH connection and channel are active."""
+        return (
+            self.ssh_client is not None
+            and self.ssh_channel is not None
+            and not self.ssh_channel.closed
+            and self.ssh_client.get_transport() is not None
+            and self.ssh_client.get_transport().is_active()
+        )
+
+    @Connection.check_occupied
+    def write_command(
+        self,
+        command: str,
+        expected_prompt_pattern: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
+    ) -> Optional[str]:
+        """
+        Sends a command via SSH and returns the response.
+        
+        Args:
+            command (str): The command to send
+            expected_prompt_pattern (Optional[List[str]]): Regex patterns to wait for
+            timeout (Optional[int]): Timeout in seconds
+            
+        Returns:
+            Optional[str]: The command response
+            
+        Raises:
+            ConnectionError: If SSH connection is not established
+        """
+        if not self.is_connected:
+            raise ConnectionError("SSH connection is not established")
+
+        if self.ssh_channel is None:
+            raise ConnectionError("SSH channel is not available")
+
+        # Clear any pending data
+        self._flush_channel()
+
+        # Send the command
+        command_with_newline = command + "\n"
+        self.ssh_channel.send(command_with_newline.encode('utf-8'))
+
+        # Read the response
+        response_parts = []
+        command_timeout = timeout or self.timeout
+        start_time = time.time()
+
+        while True:
+            if time.time() - start_time > command_timeout:
+                logger.warning(f"Command '{command}' timed out after {command_timeout} seconds")
+                break
+
+            if self.ssh_channel.recv_ready():
+                try:
+                    data = self.ssh_channel.recv(4096).decode('utf-8')
+                    response_parts.append(data)
+
+                    # Check if we have a complete response
+                    full_response = ''.join(response_parts)
+
+                    if expected_prompt_pattern:
+                        # Check against expected patterns
+                        for pattern in expected_prompt_pattern:
+                            if re.search(pattern, full_response):
+                                return full_response
+                    else:
+                        # Check for prompt symbol
+                        if self.prompt_symbol and self.prompt_symbol in full_response:
+                            return full_response
+
+                except socket.timeout:
+                    continue
+                except Exception as e:
+                    logger.error(f"Error reading SSH response: {e}")
+                    break
+            else:
+                time.sleep(0.1)
+
+        return ''.join(response_parts) if response_parts else None
+
+    @Connection.check_occupied
+    def flush(self, time_interval: float = 0.1) -> None:
+        """Flush any pending data from the SSH channel."""
+        time.sleep(time_interval)
+        self._flush_channel()
+
+    @Connection.check_occupied
+    def flush_deep(self, time_interval: float = 0.1, retries_timeout: int = 60) -> None:
+        """Perform deep flush with retries until prompt appears."""
+        logger.debug("SSH deep flushing...")
+        start_time = time.time()
+
+        while True:
+            self.flush(time_interval)
+
+            # Try to get current prompt
+            if self.ssh_channel and self.ssh_channel.recv_ready():
+                try:
+                    data = self.ssh_channel.recv(1024).decode('utf-8')
+                    if self.prompt_symbol and self.prompt_symbol in data:
+                        break
+                except:
+                    pass
+
+            if retries_timeout > 0 and time.time() - start_time > retries_timeout:
+                logger.warning(f"Deep flush timed out after {retries_timeout} seconds")
+                break
+
+            time.sleep(time_interval)
+
+
+class TelnetConnection(Connection):
+    """
+    Represents a Telnet connection, always originating from the Host device to another device.
+    It uses the telnetlib library to establish and manage the connection.
+    
+    .. deprecated:: 0.2.0
+        TelnetConnection is deprecated due to security concerns. Telnet transmits data in plain text.
+        Use SSHConnection instead for secure communication.
+        
+    .. warning::
+        This class will be removed in a future version. Please migrate to SSHConnection.
+    """
+
+    def __init__(self, timeout: int = 10):
+        super().__init__(timeout)
+
+        # Issue deprecation warning
+        warnings.warn(
+            "TelnetConnection is deprecated and will be removed in a future version. "
+            "Use SSHConnection instead for secure communication.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.resulting_telnet_connection = telnetlib.Telnet()  # Not connected
 
     @Connection.check_occupied

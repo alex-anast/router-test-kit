@@ -3,7 +3,6 @@
 import os
 import sys
 
-
 # Add the root directory to the path so that the package can be imported
 root_directory = os.path.abspath(os.path.dirname(__file__))
 print(root_directory)

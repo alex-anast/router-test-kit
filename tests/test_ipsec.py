@@ -21,27 +21,41 @@ FIXME: setup9, setup19 (Oragne Setups) not working
 FIXME: setup27 not working, not able to ping the IPv6 addresses
 """
 
-import os
-import re
-import sys
 import json
 import logging
+import os
+import re
 import socket
+import sys
 from time import sleep
-from typing import Optional, Dict, List, Tuple, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 import pytest
 
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-import src.static_utils
-from src.device import OneOS6Device, RADIUSServer
-from src.connection import TelnetConnection
-from conftest import RED, GREEN, YELLOW, NC, OK, NOK, SKIPPED  # Colouring
-from conftest import ROOT_PATH, IPSEC_CFG_DIR_NAME, IPSEC_JSON_NAME
-from conftest import SHOW_CRYPTO_DIR, BSA_DIR, RADIUS_CFG_DIR_NAME  # Paths and file names
-from conftest import TEST_SETUPS_GENERIC, TEST_SETUPS_ALGORITHMS, json_config  # Info from JSON
+from conftest import (  # Colouring  # Paths and file names  # Info from JSON
+    BSA_DIR,
+    GREEN,
+    IPSEC_CFG_DIR_NAME,
+    IPSEC_JSON_NAME,
+    NC,
+    NOK,
+    OK,
+    RADIUS_CFG_DIR_NAME,
+    RED,
+    ROOT_PATH,
+    SHOW_CRYPTO_DIR,
+    SKIPPED,
+    TEST_SETUPS_ALGORITHMS,
+    TEST_SETUPS_GENERIC,
+    YELLOW,
+    json_config,
+)
 
+import src.static_utils
+from src.connection import TelnetConnection
+from src.device import OneOS6Device, RADIUSServer
 
 logger = logging.getLogger(__name__)
 
@@ -214,7 +228,7 @@ def assert_config_is_matching(connection: "TelnetConnectionIPSEC", encr_info: Di
     try:
         # Calls "show running-config" (5s overhead)
         crypto_ikev2_proposal_name = assert_current_config(connection, encr_info)
-    except AssertionError as err:
+    except AssertionError:
         logger.error(f"{RED}{NOK}Current config is not as expected - {connection.destination_device.hostname}{NC}")
     # Check encryption, integrity and group completions
     for key, value in encr_info.items():
@@ -497,12 +511,12 @@ def cleanup_interfaces(password, interface_info: List[Dict[str, str]]) -> None:
                 intf_ip = interface["ipv6"]
                 src.static_utils.del_interface_ip(intf_name, intf_ip, password, 64)
             else:
-                logger.error(f"No 'ip' or 'ipv6' key found in interface dictionary.")
+                logger.error("No 'ip' or 'ipv6' key found in interface dictionary.")
                 raise KeyError
         except ValueError:
             logger.error(f"{intf_ip} is not a valid IP address.")
         except KeyError:
-            logger.error(f"Key not found in interface dictionary.")
+            logger.error("Key not found in interface dictionary.")
 
 
 def cleanup_radius(connection: TelnetConnection) -> None:

@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 import time
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
@@ -21,23 +21,30 @@ logger = logging.getLogger(__name__)
 class TestCollector:
     """A pytest plugin to collect test items."""
 
-    def pytest_collection_finish(self, session):
+    def pytest_collection_finish(self, session: pytest.Session) -> None:
         """Called after test collection has been completed and modified."""
         self.test_items = session.items
 
 
-def get_tests() -> TestCollector:
+def get_tests() -> List[pytest.Item]:
+    """Collect test items using pytest collection."""
     collector = TestCollector()
     pytest.main(
         ["--no-header", "--no-summary", "-qq", "--collect-only"], plugins=[collector]
     )
-    test_items = collector.test_items
-    return test_items
+    return collector.test_items
 
 
-def load_json(file_path):
-    # Assuming that the file is JSON
-    with open(file_path) as json_file:
+def load_json(file_path: str) -> Dict[str, Any]:
+    """Load and parse a JSON file.
+    
+    Args:
+        file_path: Path to the JSON file
+        
+    Returns:
+        Parsed JSON data as dictionary
+    """
+    with open(file_path, encoding='utf-8') as json_file:
         data = json.load(json_file)
     return data
 
@@ -52,32 +59,51 @@ def print_banner(*messages: str, banner_legth=80) -> None:
 
 
 def execute_shell_commands_on_host(
-    commands: List[str], print_response=False, quiet=False
+    commands: List[str], print_response: bool = False, quiet: bool = False
 ) -> Optional[str]:
-    # Might require root privileges
+    """Execute shell commands on the host system.
+    
+    Args:
+        commands: List of commands to execute
+        print_response: Whether to log successful command execution
+        quiet: Whether to suppress error logging
+        
+    Returns:
+        Combined output of all commands, or None if no output
+    """
     responses = []
     for command in commands:
-        process = subprocess.Popen(
-            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        stdout, stderr = process.communicate()
+        try:
+            result = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False
+            )
 
-        if process.returncode != 0 and not quiet:
-            logger.error(f"Error executing command: {command}")
-            logger.error(f"Error message: {stderr.decode()}")
-        else:
-            response = stdout.decode()
-            if print_response and not quiet:
-                logger.debug(f"Command executed successfully: {command}")
-                logger.debug(f"Output: {response}")
-        if stdout:
-            responses.append(stdout.decode())
-        if stderr:
-            responses.append(stderr.decode())
-    if responses:
-        return "\n".join(responses)
-    else:
-        return None
+            if result.returncode != 0 and not quiet:
+                logger.error("Error executing command: %s", command)
+                logger.error("Error message: %s", result.stderr)
+            else:
+                if print_response and not quiet:
+                    logger.debug("Command executed successfully: %s", command)
+                    logger.debug("Output: %s", result.stdout)
+
+            if result.stdout:
+                responses.append(result.stdout)
+            if result.stderr:
+                responses.append(result.stderr)
+
+        except subprocess.TimeoutExpired:
+            if not quiet:
+                logger.error("Command timed out: %s", command)
+        except OSError:
+            if not quiet:
+                logger.exception("Failed to execute command: %s", command)
+
+    return "\n".join(responses) if responses else None
 
 
 def set_interface_ip(
@@ -107,7 +133,18 @@ def del_interface_ip(
 
 
 def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
+    """Get IPv4 and IPv6 addresses assigned to a network interface.
+    
+    Args:
+        interface: Name of the network interface
+        
+    Returns:
+        Tuple of (IPv4 addresses, IPv6 addresses)
+    """
     response = execute_shell_commands_on_host([f"ip addr show {interface}"])
+    if not response:
+        return [], []
+
     ipv4_pattern = r"\binet (\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)"
     ipv4_matches = re.findall(ipv4_pattern, response)
     ipv6_pattern = r"\binet6 ([a-f0-9:]+)"
@@ -116,9 +153,22 @@ def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
 
 
 def reboot_device(
-    connection: "TelnetConnection", timeout: int = 60
-) -> "TelnetConnection":
-    if connection is None or not connection.is_connected():
+    connection: TelnetConnection, timeout: int = 60
+) -> TelnetConnection:
+    """Reboot a device and wait for it to come back online.
+    
+    Args:
+        connection: Active telnet connection to device
+        timeout: Maximum time to wait for device to come back online
+        
+    Returns:
+        Renewed connection to the device
+        
+    Raises:
+        ConnectionError: If connection is not established
+        TimeoutError: If device doesn't come back online within timeout
+    """
+    if connection is None or not connection.is_connected:
         raise ConnectionError("Connection is not established. Cannot reboot device.")
 
     vm_ip = connection.destination_ip
@@ -139,29 +189,55 @@ def reboot_device(
     return connection
 
 
-def ping(destination_ip: str, count: int = 1) -> str:
+def ping(destination_ip: str, count: int = 1) -> Optional[str]:
+    """Ping a destination and return the result.
+    
+    Args:
+        destination_ip: IP address to ping
+        count: Number of ping packets to send
+        
+    Returns:
+        Ping command output, or None if command failed
+    """
     return execute_shell_commands_on_host([f"ping -c {count} {destination_ip}"])
 
 
 def get_packet_loss(response: str) -> Optional[str]:
-    """
-    Example of result line in response:
+    """Extract packet loss percentage from ping command output.
+    
+    Args:
+        response: Output from ping command
+        
+    Returns:
+        Packet loss percentage as string, or None if not found
+        
+    Example:
         '2 packets transmitted, 2 received, 0% packet loss, time 11ms'
-    Returned value:
-        '0' (if pings have been successful)
-        None (if no packet loss percentage found)
+        Returns '0'
     """
+    if not response:
+        logger.critical("Ping: Empty response provided")
+        return None
+
     match = re.search(r"\d+(?=%)", response)
     if match:
         return match.group()
     else:
         logger.critical(
-            f"Ping: Could not find packet loss percentage in response: {response}"
+            "Ping: Could not find packet loss percentage in response: %s", response
         )
         return None
 
 
 def is_valid_ip(ip: str) -> bool:
+    """Check if a string represents a valid IP address (IPv4 or IPv6).
+    
+    Args:
+        ip: String to validate as IP address
+        
+    Returns:
+        True if valid IP address, False otherwise
+    """
     try:
         ipaddress.ip_address(ip)
         return True
@@ -170,25 +246,39 @@ def is_valid_ip(ip: str) -> bool:
 
 
 def scp_file_to_home_dir(local_file_path: str, user_at_ip: str, password: str) -> None:
+    """Copy a local file to remote host's home directory using SCP.
+    
+    Args:
+        local_file_path: Path to local file to copy
+        user_at_ip: Remote destination in format 'user@ip'
+        password: Password for remote authentication
+        
+    Raises:
+        FileNotFoundError: If local file or remote path is invalid
+        ValueError: If unknown error occurs during transfer
+    """
     # Check if sshpass is installed on device
     host_vm = HostDevice()
     response = host_vm.write_command("sshpass")
-    # response = execute_shell_commands_on_host(["sshpass"])
-    if "Usage: sshpass" not in response:
+
+    if not response or "Usage: sshpass" not in response:
         logger.critical(
             'sshpass is not installed on the device. Please install it by "sudo apt install sshpass"'
         )
+        return
+
     command = f"sshpass -p {password} scp {local_file_path} {user_at_ip}:~"
     response = host_vm.write_command(command)
+
     if response is None:
         return
     elif "No such file or directory" in response:
         logger.critical(
-            f"Some file path is not valid. Local: {local_file_path}, @: {user_at_ip}"
+            "Some file path is not valid. Local: %s, @: %s", local_file_path, user_at_ip
         )
         raise FileNotFoundError
     else:
         logger.critical(
-            f"Unknown error occurred while copying file to the device. Got response: {response}"
+            "Unknown error occurred while copying file to the device. Got response: %s", response
         )
-        return ValueError
+        raise ValueError("SCP transfer failed")

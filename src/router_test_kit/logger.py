@@ -11,10 +11,10 @@ Pytest automatically captures the log messages and prints them in the stdout.
 """
 
 import logging
-import os
+from pathlib import Path
 
 
-def setup_logger():
+def setup_logger() -> None:
     """
     Sets up a logger that outputs log messages to a file.
 
@@ -28,12 +28,13 @@ def setup_logger():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    # Create a logs directory if it doesn't exist
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+    # Create a logs directory if it doesn't exist using pathlib
+    logs_dir = Path("logs")
+    logs_dir.mkdir(exist_ok=True)
 
     # Define a handler to output log messages to a file
-    file_handler = logging.FileHandler("logs/debug.log")
+    log_file = logs_dir / "debug.log"
+    file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
 
     # Define a formatter to output log messages with date and time
