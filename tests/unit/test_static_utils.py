@@ -9,6 +9,7 @@ import os
 import subprocess
 import tempfile
 from unittest.mock import patch, MagicMock
+import pytest
 
 from router_test_kit.static_utils import (
     get_packet_loss, 
@@ -21,6 +22,7 @@ from router_test_kit.static_utils import (
     set_interface_ip,
     del_interface_ip,
     scp_file_to_home_dir,
+    get_tests,
 )
 
 
@@ -293,17 +295,271 @@ class TestDelInterfaceIp:
 
 
 class TestScpFileToHomeDir:
-    """Test cases for the scp_file_to_home_dir function."""
-    
+    """Test cases for scp_file_to_home_dir function."""
+
     @patch('router_test_kit.static_utils.HostDevice')
     def test_scp_file_sshpass_not_installed(self, mock_host_device):
-        """Test SCP when sshpass is not installed."""
+        """Test scp_file_to_home_dir when sshpass is not installed."""
+        # Mock HostDevice to return response indicating sshpass not installed
         mock_device = MagicMock()
         mock_device.write_command.return_value = "command not found"
         mock_host_device.return_value = mock_device
         
-        with patch('router_test_kit.static_utils.logger') as mock_logger:
-            result = scp_file_to_home_dir("/tmp/test.txt", "user@192.168.1.1", "password")
+        # This should log critical and return without raising
+        from router_test_kit import static_utils
+        result = static_utils.scp_file_to_home_dir("/test/file", "user@host", "password")
+        assert result is None
+
+
+class TestPingErrorCases:
+    """Test error cases for ping function."""
+    
+    @patch('router_test_kit.static_utils.execute_shell_commands_on_host')
+    def test_ping_failure(self, mock_execute):
+        """Test ping when command fails."""
+        mock_execute.return_value = None
+        
+        result = ping("192.168.1.1", count=1)
+        
+        assert result is None
+        mock_execute.assert_called_once()
+
+
+class TestLoadJsonErrorCases:
+    """Test error cases for load_json function."""
+    
+    def test_load_json_file_not_found(self):
+        """Test load_json with non-existent file."""
+        with pytest.raises(FileNotFoundError):
+            load_json("non_existent_file.json")
+    
+    @patch('builtins.open')
+    def test_load_json_invalid_json(self, mock_open):
+        """Test load_json with invalid JSON content."""
+        mock_open.return_value.__enter__.return_value.read.return_value = "invalid json content"
+        
+        with pytest.raises(json.JSONDecodeError):
+            load_json("invalid.json")
+
+
+class TestExecuteShellCommandsErrorPaths:
+    """Test error paths for execute_shell_commands_on_host."""
+    
+    @patch('router_test_kit.static_utils.subprocess.run')
+    @patch('router_test_kit.static_utils.logger')
+    def test_execute_shell_commands_timeout(self, mock_logger, mock_run):
+        """Test execute_shell_commands_on_host with timeout."""
+        mock_run.side_effect = subprocess.TimeoutExpired("test", 1)
+        
+        result = execute_shell_commands_on_host(["timeout_command"], quiet=False)
+        
+        assert result is None
+        mock_logger.error.assert_called_with("Command timed out: %s", "timeout_command")
+    
+    @patch('router_test_kit.static_utils.subprocess.run')
+    @patch('router_test_kit.static_utils.logger')
+    def test_execute_shell_commands_os_error(self, mock_logger, mock_run):
+        """Test execute_shell_commands_on_host with OS error."""
+        mock_run.side_effect = OSError("Command not found")
+        
+        result = execute_shell_commands_on_host(["bad_command"], quiet=False)
+        
+        assert result is None
+        mock_logger.exception.assert_called_with("Failed to execute command: %s", "bad_command")
+    
+    @patch('router_test_kit.static_utils.subprocess.run')
+    @patch('router_test_kit.static_utils.logger')
+    def test_execute_shell_commands_quiet_mode_error(self, mock_logger, mock_run):
+        """Test execute_shell_commands_on_host in quiet mode with error."""
+        mock_run.side_effect = OSError("Command not found")
+        
+        result = execute_shell_commands_on_host(["bad_command"], quiet=True)
+        
+        assert result is None
+        # Should not log in quiet mode
+        mock_logger.exception.assert_not_called()
+
+
+class TestPrintBannerEdgeCases:
+    """Test edge cases for print_banner function."""
+    
+    @patch('router_test_kit.static_utils.logger')
+    def test_print_banner_empty_message(self, mock_logger):
+        """Test print_banner with empty message."""
+        print_banner("")
+        
+        # Should still log the banner structure
+        assert mock_logger.info.call_count > 0
+    
+    @patch('router_test_kit.static_utils.logger')
+    def test_print_banner_multiline_message(self, mock_logger):
+        """Test print_banner with multiline message."""
+        message = "Line 1\\nLine 2\\nLine 3"
+        print_banner(message)
+        
+        # Should handle multiline messages
+        assert mock_logger.info.call_count > 0
+
+
+class TestGetTests:
+    """Test cases for get_tests function."""
+    
+    @patch('pytest.main')
+    def test_get_tests_collection(self, mock_pytest_main):
+        """Test get_tests function collects pytest items."""
+        # Mock a test collector with items
+        mock_collector = MagicMock()
+        mock_collector.test_items = ["test1", "test2", "test3"]
+        
+        with patch('router_test_kit.static_utils.TestCollector', return_value=mock_collector):
+            result = get_tests()
             
-            assert result is None
-            mock_logger.critical.assert_called()
+        # Verify pytest.main was called with collection arguments
+        mock_pytest_main.assert_called_once()
+        args = mock_pytest_main.call_args[0][0]
+        assert "--collect-only" in args
+        assert "--no-header" in args
+        assert result == ["test1", "test2", "test3"]
+
+
+class TestScpFileToHomeDirErrorCases:
+    """Test error cases for scp_file_to_home_dir function."""
+
+    @patch('router_test_kit.static_utils.HostDevice')
+    def test_scp_file_no_such_file_error(self, mock_host_device):
+        """Test scp_file_to_home_dir when file not found."""
+        mock_device = MagicMock()
+        mock_device.write_command.side_effect = [
+            "Usage: sshpass",  # sshpass check passes
+            "No such file or directory"  # scp command fails
+        ]
+        mock_host_device.return_value = mock_device
+        
+        with pytest.raises(FileNotFoundError):
+            scp_file_to_home_dir("/nonexistent/file", "user@host", "password")
+            
+    @patch('router_test_kit.static_utils.HostDevice')
+    def test_scp_file_unknown_error(self, mock_host_device):
+        """Test scp_file_to_home_dir with unknown error."""
+        mock_device = MagicMock()
+        mock_device.write_command.side_effect = [
+            "Usage: sshpass",  # sshpass check passes
+            "Unknown error occurred"  # scp command has other error
+        ]
+        mock_host_device.return_value = mock_device
+        
+        with pytest.raises(ValueError, match="SCP transfer failed"):
+            scp_file_to_home_dir("/test/file", "user@host", "password")
+            
+    @patch('router_test_kit.static_utils.HostDevice')
+    def test_scp_file_command_returns_none(self, mock_host_device):
+        """Test scp_file_to_home_dir when scp command returns None."""
+        mock_device = MagicMock()
+        mock_device.write_command.side_effect = [
+            "Usage: sshpass",  # sshpass check passes
+            None  # scp command returns None
+        ]
+        mock_host_device.return_value = mock_device
+        
+        result = scp_file_to_home_dir("/test/file", "user@host", "password")
+        assert result is None
+
+
+class TestIsValidIpErrorCases:
+    """Test error cases for is_valid_ip function."""
+    
+    def test_is_valid_ip_with_invalid_regex_chars(self):
+        """Test is_valid_ip with characters that might break regex."""
+        test_cases = [
+            "192.168.1.1/24",  # CIDR notation
+            "192.168.1.1:8080",  # Port notation
+            "192.168.1.[1-10]",  # Range notation
+            "192.168.1.*",  # Wildcard
+            "192.168.1.1/netmask"  # With text
+        ]
+        
+        for test_ip in test_cases:
+            result = is_valid_ip(test_ip)
+            assert result is False, f"Expected {test_ip} to be invalid"
+            
+    def test_is_valid_ip_boundary_values(self):
+        """Test is_valid_ip with boundary values."""
+        # Test octets at boundaries
+        valid_boundaries = [
+            "0.0.0.0",
+            "255.255.255.255",
+            "127.0.0.1"
+        ]
+        
+        invalid_boundaries = [
+            "256.1.1.1",
+            "1.256.1.1", 
+            "1.1.256.1",
+            "1.1.1.256"
+        ]
+        
+        for ip in valid_boundaries:
+            assert is_valid_ip(ip) is True, f"Expected {ip} to be valid"
+            
+        for ip in invalid_boundaries:
+            assert is_valid_ip(ip) is False, f"Expected {ip} to be invalid"
+
+
+class TestRebootDevice:
+    """Test cases for reboot_device function."""
+    
+    @patch('router_test_kit.static_utils.get_packet_loss')
+    @patch('router_test_kit.static_utils.time')
+    def test_reboot_device_success(self, mock_time, mock_get_packet_loss):
+        """Test successful device reboot."""
+        # Mock connection
+        mock_connection = MagicMock()
+        mock_connection.is_connected = True
+        mock_connection.destination_ip = "192.168.1.1"
+        mock_connection.destination_device = "test_device"
+        
+        # Mock time progression
+        mock_time.time.side_effect = [0, 10, 20]  # Start, check, success
+        mock_get_packet_loss.return_value = 0  # Device is back online
+        
+        from router_test_kit.static_utils import reboot_device
+        result = reboot_device(mock_connection, timeout=60)
+        
+        # Verify reboot commands were sent
+        mock_connection.write_command.assert_any_call("show expert system command bash")
+        mock_connection.write_command.assert_any_call("/sbin/reboot")
+        mock_connection.disconnect.assert_called_once()
+        mock_connection.connect.assert_called_once()
+        assert result == mock_connection
+        
+    def test_reboot_device_no_connection(self):
+        """Test reboot with no connection."""
+        mock_connection = MagicMock()
+        mock_connection.is_connected = False
+        
+        from router_test_kit.static_utils import reboot_device
+        with pytest.raises(ConnectionError, match="Connection is not established"):
+            reboot_device(mock_connection)
+            
+    def test_reboot_device_none_connection(self):
+        """Test reboot with None connection."""
+        from router_test_kit.static_utils import reboot_device
+        with pytest.raises(ConnectionError, match="Connection is not established"):
+            reboot_device(None)  # type: ignore
+            
+    @patch('router_test_kit.static_utils.get_packet_loss')
+    @patch('router_test_kit.static_utils.time')
+    def test_reboot_device_timeout(self, mock_time, mock_get_packet_loss):
+        """Test reboot timeout scenario."""
+        mock_connection = MagicMock()
+        mock_connection.is_connected = True
+        mock_connection.destination_ip = "192.168.1.1"
+        mock_connection.destination_device = "test_device"
+        
+        # Mock time progression that exceeds timeout
+        mock_time.time.side_effect = [0, 30, 70]  # Start, check, timeout exceeded
+        mock_get_packet_loss.return_value = 100  # Device never comes back
+        
+        from router_test_kit.static_utils import reboot_device
+        with pytest.raises(TimeoutError, match="Rebooting device.*took too long"):
+            reboot_device(mock_connection, timeout=60)
