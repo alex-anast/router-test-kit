@@ -7,18 +7,13 @@ This example assumes there is an Ubuntu Server VM up and running.
 See the README for specific details regarding the setup.
 """
 
-import sys
-import os
-
-# Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from src.device import LinuxDevice
-from src.connection import TelnetConnection
+from router_test_kit.device import LinuxDevice
+from router_test_kit.connection import SSHConnection
 
 
 def main():
     """
-    Connect to a device using telnet, check status and disconnect.
+    Connect to a device using SSH, check status and disconnect.
     Assert the connection status on the way.
     """
     # Register a LinuxDevice object for the Ubuntu Server
@@ -26,8 +21,8 @@ def main():
     vm = LinuxDevice(username="user", password="user")
     print(f"Device of type {vm.type} registered.")
 
-    # Connect to the device using telnet
-    connection = TelnetConnection(timeout=10)
+    # Connect to the device using SSH (secure connection)
+    connection = SSHConnection(timeout=10)
     connection = connection.connect(
         destination_device=vm,
         destination_ip="192.168.56.2",  # Assuming subnet /24

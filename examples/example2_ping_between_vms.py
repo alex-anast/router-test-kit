@@ -7,15 +7,9 @@ This example assumes there are two Ubuntu Server VMs up and running.
 See the README for specific details regarding the setup.
 """
 
-import sys
-import os
-import time
-
-# Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from src.device import LinuxDevice
-from src.connection import TelnetConnection
-from src.static_utils import get_packet_loss
+from router_test_kit.device import LinuxDevice
+from router_test_kit.connection import SSHConnection
+from router_test_kit.static_utils import get_packet_loss
 
 
 def main():
@@ -34,14 +28,14 @@ def main():
     print(f"Device 2 of type {vm1.type} registered.")
 
     # Connect to the devices using telnet
-    connection1 = TelnetConnection(timeout=10) # Connection from Host to VM1
+    connection1 = SSHConnection(timeout=10) # Connection from Host to VM1
     connection1 = connection1.connect(
         destination_device=vm1,
         destination_ip="192.168.56.2",  # Assuming subnet /24
     )
     print(f"Connected to VM1: {connection1.is_connected}")
 
-    connection2 = TelnetConnection(timeout=10) # Connection from Host to VM2
+    connection2 = SSHConnection(timeout=10) # Connection from Host to VM2
     connection2 = connection2.connect(
         destination_device=vm2,
         destination_ip="192.168.56.3",  # Assuming subnet /24
@@ -51,7 +45,7 @@ def main():
     # Ping from VM1 to VM2
     print("Pinging from VM1 to VM2...")
     ping_response = connection1.ping(
-        ip=connection2.destination_ip,
+        ip="192.168.56.3",  # IP address of VM2
         nbr_packets=3,
         ping_timeout=10,
     )
