@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from router_test_kit.connection import SSHConnection
+from router_test_kit.connection import SSHConnection, TelnetConnection
 from router_test_kit.device import Device
 
 
@@ -226,3 +226,173 @@ class TestSSHConnection:
 
         with pytest.raises(Exception):  # ConnectionRefusedError or similar
             self.ssh_conn.connect(self.mock_device, self.destination_ip)
+
+
+class TestTelnetConnection:
+    """Test cases for the TelnetConnection class."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        with patch('warnings.warn'):  # Suppress deprecation warning during tests
+            self.telnet_conn = TelnetConnection(timeout=5)
+        self.mock_device = MagicMock(spec=Device)
+        self.mock_device.username = "testuser"
+        self.mock_device.password = "testpass"
+        self.mock_device.hostname = "testhost"
+        self.mock_device.DEFAULT_PROMPT_SYMBOL = "$ "
+        self.destination_ip = "192.168.1.1"
+
+    def test_init(self):
+        """Test TelnetConnection initialization."""
+        with patch('warnings.warn') as mock_warn:
+            conn = TelnetConnection(timeout=10)
+            assert conn.timeout == 10
+            assert conn.resulting_telnet_connection is not None
+            # Should issue deprecation warning
+            mock_warn.assert_called_once()
+
+    @patch('router_test_kit.connection.telnetlib.Telnet')
+    def test_connect_success(self, mock_telnet):
+        """Test successful Telnet connection."""
+        mock_telnet_instance = MagicMock()
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        # Mock successful authentication process
+        mock_telnet_instance.expect.side_effect = [
+            (0, b"Username:", b""),  # Username prompt found
+            (0, b"Password:", b""),  # Password prompt found
+        ]
+        mock_telnet_instance.read_until.return_value = b"$ "
+        
+        # Mock the socket to make is_connected return True
+        mock_socket = MagicMock()
+        mock_socket.getsockopt.return_value = 1  # Valid socket type
+        mock_telnet_instance.get_socket.return_value = mock_socket
+        
+        result = self.telnet_conn.connect(self.mock_device, self.destination_ip)
+        
+        assert result == self.telnet_conn
+        assert self.telnet_conn.destination_device == self.mock_device
+        assert self.telnet_conn.destination_ip == self.destination_ip
+
+    @patch('router_test_kit.connection.telnetlib.Telnet')
+    def test_connect_failure(self, mock_telnet):
+        """Test Telnet connection failure."""
+        mock_telnet_instance = MagicMock()
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        # Mock connection failure
+        mock_telnet_instance.open.side_effect = Exception("Connection failed")
+        
+        with pytest.raises(Exception):
+            self.telnet_conn.connect(self.mock_device, self.destination_ip)
+
+    def test_is_connected_true(self):
+        """Test is_connected returns True when connected."""
+        mock_telnet_instance = MagicMock()
+        mock_socket = MagicMock()
+        mock_telnet_instance.get_socket.return_value = mock_socket
+        mock_socket.getsockopt.return_value = 1  # Valid socket type
+        
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        assert self.telnet_conn.is_connected is True
+
+    def test_is_connected_false_no_connection(self):
+        """Test is_connected returns False when no connection."""
+        self.telnet_conn.resulting_telnet_connection = None
+        
+        assert self.telnet_conn.is_connected is False
+
+    def test_is_connected_false_socket_error(self):
+        """Test is_connected returns False when socket error occurs."""
+        mock_telnet_instance = MagicMock()
+        mock_telnet_instance.get_socket.side_effect = Exception("Socket error")
+        
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        assert self.telnet_conn.is_connected is False
+
+    @patch('router_test_kit.connection.logger')
+    def test_disconnect(self, mock_logger):
+        """Test Telnet disconnection."""
+        mock_telnet_instance = MagicMock()
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        self.telnet_conn.destination_device = self.mock_device
+        self.telnet_conn.destination_ip = self.destination_ip
+        
+        # Mock the socket behavior to simulate disconnection after close()
+        mock_socket = MagicMock()
+        mock_telnet_instance.get_socket.return_value = mock_socket
+        
+        # Track whether close() has been called
+        close_called = False
+        
+        def close_side_effect():
+            nonlocal close_called
+            close_called = True
+        
+        def get_socket_side_effect():
+            if close_called:
+                raise Exception("Connection closed")
+            return mock_socket
+        
+        mock_telnet_instance.close.side_effect = close_side_effect
+        mock_telnet_instance.get_socket.side_effect = get_socket_side_effect
+        mock_socket.getsockopt.return_value = 1  # Valid socket before close
+        
+        self.telnet_conn.disconnect()
+        
+        mock_telnet_instance.close.assert_called_once()
+        # Should log disconnection
+        mock_logger.info.assert_called_once()
+
+    def test_disconnect_failure(self):
+        """Test disconnect raises error if connection cannot be closed."""
+        mock_telnet_instance = MagicMock()
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        self.telnet_conn.destination_device = self.mock_device
+        self.telnet_conn.destination_ip = self.destination_ip
+        
+        # Mock socket to always return True (connection stays active even after close)
+        mock_socket = MagicMock()
+        mock_socket.getsockopt.return_value = 1  # Always returns valid socket type
+        mock_telnet_instance.get_socket.return_value = mock_socket
+        
+        with pytest.raises(ConnectionError):
+            self.telnet_conn.disconnect()
+
+    def test_write_credentials_success(self):
+        """Test successful credential writing."""
+        mock_telnet_instance = MagicMock()
+        mock_telnet_instance.expect.return_value = (0, b"login:", b"")
+        
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        self.telnet_conn._write_credentials([b"login:"], "testuser")
+        
+        mock_telnet_instance.write.assert_called_once_with(b"testuser\r")
+
+    def test_write_credentials_no_match(self):
+        """Test credential writing when no match found."""
+        mock_telnet_instance = MagicMock()
+        mock_telnet_instance.expect.return_value = (-1, None, b"no match")
+        
+        self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
+        
+        with pytest.raises(EOFError):
+            self.telnet_conn._write_credentials([b"login:"], "testuser")
+
+    def test_write_credentials_no_connection(self):
+        """Test credential writing when no connection object."""
+        self.telnet_conn.resulting_telnet_connection = None
+        
+        # Should not raise an exception, just log an error
+        self.telnet_conn._write_credentials([b"login:"], "testuser")
+
+    def test_occupied_decorator(self):
+        """Test the occupied decorator functionality for Telnet."""
+        self.telnet_conn._is_occupied = True
+        
+        with pytest.raises(ConnectionRefusedError):
+            self.telnet_conn.connect(self.mock_device, self.destination_ip)
