@@ -1,45 +1,48 @@
-import re
-import json
-import time
-import logging
-import subprocess
 import ipaddress
-import sys
+import json
+import logging
 import os
+import re
+import subprocess
+import sys
+import time
 from typing import List, Optional, Tuple
 
 import pytest
 
 # Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from router_test_kit.device import HostDevice
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from router_test_kit.connection import TelnetConnection
+from router_test_kit.device import HostDevice
 
 logger = logging.getLogger(__name__)
 
 
 class TestCollector:
-    """ A pytest plugin to collect test items. """
+    """A pytest plugin to collect test items."""
+
     def pytest_collection_finish(self, session):
-        """ Called after test collection has been completed and modified. """
+        """Called after test collection has been completed and modified."""
         self.test_items = session.items
 
 
 def get_tests() -> TestCollector:
     collector = TestCollector()
-    pytest.main(["--no-header", "--no-summary", "-qq", "--collect-only"], plugins=[collector])
+    pytest.main(
+        ["--no-header", "--no-summary", "-qq", "--collect-only"], plugins=[collector]
+    )
     test_items = collector.test_items
     return test_items
 
 
 def load_json(file_path):
     # Assuming that the file is JSON
-    with open(file_path, 'r') as json_file:
+    with open(file_path) as json_file:
         data = json.load(json_file)
     return data
 
 
-def print_banner(*messages: str, banner_legth = 80) -> None:
+def print_banner(*messages: str, banner_legth=80) -> None:
     """Prints a banner out of any number of messages."""
     border = "*" * banner_legth
     logger.info(border)
@@ -48,11 +51,15 @@ def print_banner(*messages: str, banner_legth = 80) -> None:
     logger.info(border)
 
 
-def execute_shell_commands_on_host(commands: List[str], print_response = False, quiet = False) -> Optional[str]:
+def execute_shell_commands_on_host(
+    commands: List[str], print_response=False, quiet=False
+) -> Optional[str]:
     # Might require root privileges
     responses = []
     for command in commands:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         stdout, stderr = process.communicate()
 
         if process.returncode != 0 and not quiet:
@@ -68,29 +75,33 @@ def execute_shell_commands_on_host(commands: List[str], print_response = False, 
         if stderr:
             responses.append(stderr.decode())
     if responses:
-        return '\n'.join(responses)
+        return "\n".join(responses)
     else:
         return None
 
 
-def set_interface_ip(interface_name: str, ip: str, password: str, netmask: str = "24") -> None:
-    if '/' not in ip:
+def set_interface_ip(
+    interface_name: str, ip: str, password: str, netmask: str = "24"
+) -> None:
+    if "/" not in ip:
         ip = f"{ip}/{netmask}"
     command = f"echo {password} | sudo -S ip addr add {ip} dev {interface_name}"
     execute_shell_commands_on_host([command], quiet=True)
 
 
-def del_interface_ip(interface: str, ip: str, password: str, netmask: str = "24") -> None:
-    if '/' not in ip:
+def del_interface_ip(
+    interface: str, ip: str, password: str, netmask: str = "24"
+) -> None:
+    if "/" not in ip:
         ip = f"{ip}/{netmask}"
     command = f"echo {password} | sudo -S ip addr del {ip} dev {interface}"
 
     # If the IP to be deleted is the only one on the interface, skip
     # Useful for: if developer uses their standard IP, it will not be deleted
     ipv4s, ipv6s = get_interface_ips(interface)
-    if len(ipv4s) == 1 and ip.split('/')[0] in ipv4s:
+    if len(ipv4s) == 1 and ip.split("/")[0] in ipv4s:
         return
-    if len(ipv6s) == 1 and ip.split('/')[0] in ipv6s:
+    if len(ipv6s) == 1 and ip.split("/")[0] in ipv6s:
         return
     execute_shell_commands_on_host([command])
 
@@ -104,7 +115,9 @@ def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
     return ipv4_matches if ipv4_matches else [], ipv6_matches if ipv6_matches else []
 
 
-def reboot_device(connection: "TelnetConnection", timeout: int = 60) -> "TelnetConnection":
+def reboot_device(
+    connection: "TelnetConnection", timeout: int = 60
+) -> "TelnetConnection":
     if connection is None or not connection.is_connected():
         raise ConnectionError("Connection is not established. Cannot reboot device.")
 
@@ -130,18 +143,22 @@ def ping(destination_ip: str, count: int = 1) -> str:
     return execute_shell_commands_on_host([f"ping -c {count} {destination_ip}"])
 
 
-def get_packet_loss(response: str) -> str:
+def get_packet_loss(response: str) -> Optional[str]:
     """
     Example of result line in response:
         '2 packets transmitted, 2 received, 0% packet loss, time 11ms'
     Returned value:
         '0' (if pings have been successful)
+        None (if no packet loss percentage found)
     """
     match = re.search(r"\d+(?=%)", response)
     if match:
         return match.group()
     else:
-        logger.critical(f"Ping: Could not find packet loss percentage in response: {response}")
+        logger.critical(
+            f"Ping: Could not find packet loss percentage in response: {response}"
+        )
+        return None
 
 
 def is_valid_ip(ip: str) -> bool:
@@ -158,14 +175,20 @@ def scp_file_to_home_dir(local_file_path: str, user_at_ip: str, password: str) -
     response = host_vm.write_command("sshpass")
     # response = execute_shell_commands_on_host(["sshpass"])
     if "Usage: sshpass" not in response:
-        logger.critical('sshpass is not installed on the device. Please install it by "sudo apt install sshpass"')
+        logger.critical(
+            'sshpass is not installed on the device. Please install it by "sudo apt install sshpass"'
+        )
     command = f"sshpass -p {password} scp {local_file_path} {user_at_ip}:~"
     response = host_vm.write_command(command)
     if response is None:
         return
     elif "No such file or directory" in response:
-        logger.critical(f"Some file path is not valid. Local: {local_file_path}, @: {user_at_ip}")
+        logger.critical(
+            f"Some file path is not valid. Local: {local_file_path}, @: {user_at_ip}"
+        )
         raise FileNotFoundError
     else:
-        logger.critical(f"Unknown error occurred while copying file to the device. Got response: {response}")
+        logger.critical(
+            f"Unknown error occurred while copying file to the device. Got response: {response}"
+        )
         return ValueError

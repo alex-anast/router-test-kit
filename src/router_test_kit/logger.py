@@ -10,8 +10,9 @@ The log messages are formatted to include the date and time, the name of the log
 Pytest automatically captures the log messages and prints them in the stdout.
 """
 
-import os
 import logging
+import os
+
 
 def setup_logger():
     """
@@ -37,7 +38,8 @@ def setup_logger():
 
     # Define a formatter to output log messages with date and time
     formatter = logging.Formatter(
-        "%(filename)s - %(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        "%(filename)s - %(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_handler.setFormatter(formatter)
 
