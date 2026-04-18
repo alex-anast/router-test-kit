@@ -126,7 +126,8 @@ addopts = [
 testpaths = ["tests"]
 markers = [
     "unit: Unit tests",
-    "integration: Integration tests",
+    "integration: Integration tests (requires Docker)",
+    "hardware: Tests requiring real network hardware — gated by RTK_HARDWARE_LAB=1 env var",
     "slow: Slow tests",
 ]
 

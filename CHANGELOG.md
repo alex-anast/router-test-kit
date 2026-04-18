@@ -8,14 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Pre-commit hooks (`.pre-commit-config.yaml`) running `ruff` (lint + format with auto-fix) and `mypy` on every commit.
+- `examples/advanced_ipsec_test/conftest.py` providing colour codes, path constants, parametrize data, and a `sudo_password` fixture so the legacy IPSec example is runnable out of the box.
+- Architecture overview page (`docs/architecture.md`) describing the Device / Connection / Plugin abstractions, linked from the README and MkDocs nav.
 
 ### Changed
 - Python compatibility is now capped at `<3.13` while `telnetlib` is the Telnet backend.
+- Legacy IPSec example (`examples/advanced_ipsec_test/test_ipsec.py`) now imports from the installed `router_test_kit` package instead of the removed `src.*` layout and the `sys.path.insert` hack.
+- Python version badge in README replaced with a static `3.9 – 3.12` badge reflecting `requires-python`.
 
 ### Deprecated
 - `TelnetConnection` and `TelnetCLIConnection` emit a `DeprecationWarning` on instantiation. Migrate to `SSHConnection` for future compatibility.
 
 ### Fixed
+- All `mypy` errors in `src/` resolved: proper `Optional` annotations on `Connection` attributes, module-level guard decorators with `Callable[..., Any]` typing, `assert` guards before `Optional` attribute access, and targeted `# type: ignore[attr-defined]` comments for OneOS6-only attribute access reached under `@_check_device_type("oneos")`.
+- All `ruff` lint violations resolved across `src/`, `tests/`, and `examples/` (UP035/UP006, E402, B904, E722, B024, B017, F841, I001, B007, E741).
+- `setup_logger()` is now idempotent — repeat calls no longer attach duplicate file handlers.
 
 ## [0.2.0] - 2025-08-09
 

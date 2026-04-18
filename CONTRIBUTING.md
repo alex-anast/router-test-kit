@@ -31,13 +31,8 @@ Thank you for your interest in contributing to Router Test Kit! This guide will 
 2. **Create and activate a virtual environment:**
 
    ```bash
-   # Using venv
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Or using conda
-   conda create -n router-test-kit python=3.12
-   conda activate router-test-kit
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 3. **Install the package with development dependencies:**
@@ -46,10 +41,17 @@ Thank you for your interest in contributing to Router Test Kit! This guide will 
    pip install -e ".[dev]"
    ```
 
-4. **Verify the installation:**
+4. **Install and enable pre-commit hooks:**
 
    ```bash
-   python -m pytest tests/unit/ -v
+   pip install pre-commit
+   pre-commit install
+   ```
+
+5. **Verify the installation:**
+
+   ```bash
+   pytest tests/unit/ -v
    ```
 
 ## Code Standards
@@ -133,54 +135,62 @@ def example_function(param1: str, param2: int = 10) -> bool:
 
 ## Testing
 
-### Running Tests
+The test suite has three tiers. See [docs/testing.md](docs/testing.md) for the full explanation.
 
-Execute the full test suite:
+### Tier 1 — Unit tests (no Docker required)
 
 ```bash
-# Run all unit tests
-python -m pytest tests/unit/ -v
-
-# Run with coverage report
-python -m pytest tests/unit/ --cov=src/router_test_kit --cov-report=term
-
-# Run specific test file
-python -m pytest tests/unit/test_connection.py -v
+pytest tests/unit/ -v
+pytest tests/unit/ --cov=src/router_test_kit --cov-report=term
 ```
+
+### Tier 2 — Integration tests (Docker required)
+
+```bash
+docker compose -f docker-compose.test.yml up -d
+pytest tests/integration/ -v -m integration
+docker compose -f docker-compose.test.yml down -v
+```
+
+### Tier 3 — Hardware tests
+
+```bash
+RTK_HARDWARE_LAB=1 pytest -m hardware
+```
+
+Hardware tests are skipped by default. Set `RTK_HARDWARE_LAB=1` to enable them.
 
 ### Writing Tests
 
 #### Test Structure
 
-- Unit tests go in `tests/unit/`
-- Integration tests go in `tests/integration/`
+- Unit tests go in `tests/unit/` — use mocks only for edge cases and error paths, not happy paths.
+- Integration tests go in `tests/integration/` — exercise real I/O (SSH container, etc.), mark with `@pytest.mark.integration`.
+- Hardware tests — mark with `@pytest.mark.hardware`; require `RTK_HARDWARE_LAB=1`.
 - Follow the naming convention: `test_<module_name>.py`
 
 #### Test Requirements
 
-1. **Mock External Dependencies**: Use `unittest.mock` for external services
-2. **Test Edge Cases**: Include error scenarios and boundary conditions
-3. **Clear Test Names**: Use descriptive test method names
+1. **Prefer real I/O over mocks for happy paths** — mock only where a real server would be impractical (timing-sensitive edge cases, error injection).
+2. **Test Edge Cases**: Include error scenarios and boundary conditions.
+3. **Clear Test Names**: Use descriptive test method names.
 
-#### Example Test Structure
+#### Example — Integration test
 
 ```python
-import unittest.mock as mock
 import pytest
 from router_test_kit.connection import SSHConnection
+from router_test_kit.device import LinuxDevice
 
-class TestSSHConnection:
-    \"\"\"Test cases for SSHConnection class.\"\"\"
-    
-    def test_connect_success(self):
-        \"\"\"Test successful SSH connection establishment.\"\"\"
-        with mock.patch('paramiko.SSHClient') as mock_ssh:
-            # Setup mocks
-            mock_ssh.return_value.connect.return_value = None
-            
-            # Test the functionality
-            conn = SSHConnection()
-            result = conn.connect(mock_device, "192.168.1.1")
+@pytest.mark.integration
+class TestSSHTransport:
+    def test_write_command_echo(self, ssh_server):
+        device = LinuxDevice(username=ssh_server["username"], password=ssh_server["password"])
+        conn = SSHConnection(timeout=15)
+        conn.connect(device, ssh_server["host"], port=ssh_server["port"])
+        result = conn.write_command("echo hello")
+        assert "hello" in result
+        conn.disconnect()
             
             # Assertions
             assert result is not None

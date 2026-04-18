@@ -14,6 +14,10 @@ A Python framework for automated testing of network devices — OneOS6 routers, 
 pip install router-test-kit
 ```
 
+## Testing
+
+Three-tier test strategy: **unit** (mocks, no Docker) → **integration** (real SSH via Docker) → **hardware** (real OneOS6 devices, opt-in). See [docs/testing.md](docs/testing.md) for setup and usage.
+
 ## Quick start
 
 ```python

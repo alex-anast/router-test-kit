@@ -72,6 +72,7 @@ nav:
   - Installation: installation.md
   - Usage: usage.md
   - Architecture: architecture.md
+  - Testing: testing.md
   - API Reference:
     - Overview: api/index.md
     - Connection: api/connection.md
