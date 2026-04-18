@@ -64,14 +64,17 @@ from router_test_kit.device import Device
 # They operate on any Connection-like object via duck-typing (Any).
 # ---------------------------------------------------------------------------
 
+
 def _check_occupied(func: Callable[..., Any]) -> Callable[..., Any]:
     """Raise ConnectionRefusedError if the connection is already in use."""
+
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if self._is_occupied:
             raise ConnectionRefusedError(
                 "This connection is already in use. Please close the connections that use it first."
             )
         return func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -79,6 +82,7 @@ def _check_device_type(
     required_type: str, is_root: bool = False
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Raise if the connected device is the wrong type or the connection is inactive."""
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             if self.destination_device.type != required_type:
@@ -91,17 +95,22 @@ def _check_device_type(
             if is_root and not self.is_root:
                 raise PermissionError("Root privileges required to perform this action")
             return func(self, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 def _check_connection(func: Callable[..., Any]) -> Callable[..., Any]:
     """Raise ConnectionError if the connection is not active."""
+
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if not self.is_connected:
             raise ConnectionError("Device is not connected")
         return func(self, *args, **kwargs)
+
     return wrapper
+
 
 logger = logging.getLogger(__name__)
 
@@ -732,7 +741,7 @@ class SSHConnection(Connection):
 
     @_check_occupied
     def connect(
-        self, destination_device: "Device", destination_ip: str
+        self, destination_device: "Device", destination_ip: str, port: int = 22
     ) -> "Connection":
         """
         Establishes an SSH connection to the destination device.
@@ -740,6 +749,7 @@ class SSHConnection(Connection):
         Args:
             destination_device (Device): The device object containing credentials
             destination_ip (str): The IP address of the destination device
+            port (int): TCP port to connect to. Defaults to 22.
 
         Returns:
             Connection: This connection object for method chaining
@@ -759,6 +769,7 @@ class SSHConnection(Connection):
             # Connect to the device
             self.ssh_client.connect(
                 hostname=destination_ip,
+                port=port,
                 username=destination_device.username,
                 password=destination_device.password,
                 timeout=self.timeout,
@@ -819,7 +830,9 @@ class SSHConnection(Connection):
     @property
     def is_connected(self) -> bool:
         """Check if the SSH connection and channel are active."""
-        transport = self.ssh_client.get_transport() if self.ssh_client is not None else None
+        transport = (
+            self.ssh_client.get_transport() if self.ssh_client is not None else None
+        )
         return (
             self.ssh_client is not None
             and self.ssh_channel is not None
