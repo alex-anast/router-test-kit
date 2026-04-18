@@ -17,7 +17,8 @@ The `tests/` directory is organized as follows:
 
 Contains unit tests for individual components of the router-test-kit framework:
 
-- `test_connection.py` - Tests for connection classes (SSH, Telnet)
+- `test_connection.py` - Tests for SSH and Telnet connection classes
+- `test_connection_simple.py` - Additional connection tests
 - `test_device.py` - Tests for device classes (Linux, OneOS6, etc.)
 - `test_static_utils.py` - Tests for utility functions
 - `test_logger.py` - Tests for logging functionality

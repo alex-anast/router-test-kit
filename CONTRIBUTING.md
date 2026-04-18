@@ -15,7 +15,7 @@ Thank you for your interest in contributing to Router Test Kit! This guide will 
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher
 - Git
 - Virtual environment tool (venv, conda, etc.)
 
@@ -40,19 +40,13 @@ Thank you for your interest in contributing to Router Test Kit! This guide will 
    conda activate router-test-kit
    ```
 
-3. **Install the package in development mode:**
+3. **Install the package with development dependencies:**
 
    ```bash
-   pip install -e .
+   pip install -e ".[dev]"
    ```
 
-4. **Install development dependencies:**
-
-   ```bash
-   pip install pytest pytest-cov ruff mypy mkdocs mkdocs-material mkdocstrings[python]
-   ```
-
-5. **Verify the installation:**
+4. **Verify the installation:**
 
    ```bash
    python -m pytest tests/unit/ -v
@@ -164,10 +158,9 @@ python -m pytest tests/unit/test_connection.py -v
 
 #### Test Requirements
 
-1. **Comprehensive Coverage**: Aim for >90% code coverage
-2. **Mock External Dependencies**: Use `unittest.mock` for external services
-3. **Test Edge Cases**: Include error scenarios and boundary conditions
-4. **Clear Test Names**: Use descriptive test method names
+1. **Mock External Dependencies**: Use `unittest.mock` for external services
+2. **Test Edge Cases**: Include error scenarios and boundary conditions
+3. **Clear Test Names**: Use descriptive test method names
 
 #### Example Test Structure
 
@@ -194,11 +187,9 @@ class TestSSHConnection:
             mock_ssh.return_value.connect.assert_called_once()
 ```
 
-### Test Coverage Requirements
+### Test Coverage
 
-- **Minimum Coverage**: 85% overall
-- **Critical Modules**: 95% for connection.py and device.py
-- **New Features**: 100% coverage for all new code
+Add tests for new functionality. Run `pytest tests/unit/ --cov=src/router_test_kit` to check coverage.
 
 ## Documentation
 
@@ -332,27 +323,10 @@ Before submitting code:
 5. **Security**: Are there any security concerns?
 6. **Performance**: Are there any performance implications?
 
-### Review Timeline
-
-- Most PRs are reviewed within 2-3 business days
-- Complex changes may take longer
-- Security-related changes are prioritized
-
 ## Getting Help
 
-If you need help or have questions:
+- **GitHub Issues**: For bug reports and feature requests
+- **Documentation**: [alex-anast.github.io/router-test-kit](https://alex-anast.github.io/router-test-kit/)
+- **Code**: Look at existing tests for usage examples
 
-1. **GitHub Discussions**: For general questions and feature discussions
-2. **GitHub Issues**: For bug reports and feature requests
-3. **Documentation**: Check the API documentation and examples
-4. **Code**: Look at existing tests for examples
-
-## Recognition
-
-Contributors who make significant improvements to the project will be recognized in:
-
-- The project README
-- Release notes
-- Documentation acknowledgments
-
-Thank you for contributing to Router Test Kit! Your efforts help make network testing more reliable and secure for everyone.
+Thank you for contributing to Router Test Kit!

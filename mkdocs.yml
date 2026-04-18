@@ -1,5 +1,5 @@
 site_name: Router Test Kit
-site_description: Professional-grade router and network device testing framework
+site_description: Python framework for automated network device testing over SSH and Telnet
 site_author: alex-anast
 
 theme:
