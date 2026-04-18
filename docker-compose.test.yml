@@ -1,0 +1,9 @@
+services:
+  ssh-server:
+    image: linuxserver/openssh-server:latest
+    network_mode: host
+    environment:
+      - USER_NAME=testuser
+      - USER_PASSWORD=testpass
+      - PASSWORD_ACCESS=true
+      - SUDO_ACCESS=false
