@@ -53,7 +53,7 @@ import logging
 import re
 import subprocess
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from router_test_kit.connection import TelnetConnection
 from router_test_kit.device import HostDevice
@@ -61,7 +61,7 @@ from router_test_kit.device import HostDevice
 logger = logging.getLogger(__name__)
 
 
-def load_json(file_path: str) -> Dict[str, Any]:
+def load_json(file_path: str) -> dict[str, Any]:
     """Load and parse a JSON file.
 
     Args:
@@ -111,7 +111,7 @@ def print_banner(*messages: str, banner_legth: int = 80) -> None:
 
 
 def execute_shell_commands_on_host(
-    commands: List[str], print_response: bool = False, quiet: bool = False
+    commands: list[str], print_response: bool = False, quiet: bool = False
 ) -> Optional[str]:
     """Execute shell commands on the host system.
 
@@ -184,7 +184,7 @@ def del_interface_ip(
     execute_shell_commands_on_host([command])
 
 
-def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
+def get_interface_ips(interface: str) -> tuple[list[str], list[str]]:
     """Get IPv4 and IPv6 addresses assigned to a network interface.
 
     Args:

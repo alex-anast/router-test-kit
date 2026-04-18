@@ -4,17 +4,17 @@ This module provides device abstraction classes that represent different types o
 network devices and hosts. Each device class encapsulates device-specific information
 such as credentials, hostnames, and device type characteristics.
 
-The module implements a device hierarchy with an abstract base class and concrete
+The module implements a device hierarchy with a base class and concrete
 implementations for different device types:
 
-- Device (ABC): Abstract base class defining the device interface
+- Device: Base class defining the device interface
 - LinuxDevice: Represents Linux-based network devices and hosts
 - OneOS6Device: Represents OneOS6 router/switch devices
 - RADIUSServer: Specialized Linux device for RADIUS authentication
 - HostDevice: Utility class for executing commands on the local host
 
 Classes:
-    Device: Abstract base class for all device types
+    Device: Base class for all device types
     LinuxDevice: Linux/Unix-based device implementation
     OneOS6Device: OneOS6 network device implementation
     RADIUSServer: RADIUS server device (extends LinuxDevice)
@@ -43,14 +43,13 @@ Note:
 
 import logging
 import subprocess
-from abc import ABC
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
-class Device(ABC):
-    """Abstract base class for network devices and hosts.
+class Device:
+    """Base class for network devices and hosts.
 
     This class provides a common interface for all device types, storing essential
     information such as credentials, hostname, and device type. Device objects are
@@ -73,10 +72,7 @@ class Device(ABC):
         DEFAULT_PROMPT_SYMBOL (str): Default command prompt symbol
 
     Example:
-        This is an abstract class and cannot be instantiated directly:
-
         ```python
-        # Use concrete implementations instead
         device = LinuxDevice(username="admin", password="secret")
         print(device.type)  # "linux"
         ```

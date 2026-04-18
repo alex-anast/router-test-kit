@@ -46,6 +46,11 @@ Version: 0.2.0
 
 import logging
 
+from .connection import Connection, SSHConnection, TelnetConnection
+from .device import Device, HostDevice, LinuxDevice, OneOS6Device, RADIUSServer
+from .plugins import PluginError, PluginManager, auto_load_plugins, get_plugin_manager
+from .static_utils import get_packet_loss, is_valid_ip, ping, print_banner
+
 # Set up basic logging configuration
 logging.basicConfig(
     level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -56,12 +61,6 @@ __version__ = "0.2.0"
 __author__ = "Alexandros Anastasiou"
 __license__ = "MIT"
 __email__ = "anastasioyaa@gmail.com"
-
-# Import main classes for convenience
-from .connection import Connection, SSHConnection, TelnetConnection
-from .device import Device, HostDevice, LinuxDevice, OneOS6Device, RADIUSServer
-from .plugins import PluginError, PluginManager, auto_load_plugins, get_plugin_manager
-from .static_utils import get_packet_loss, is_valid_ip, ping, print_banner
 
 # Auto-load plugins when package is imported
 try:

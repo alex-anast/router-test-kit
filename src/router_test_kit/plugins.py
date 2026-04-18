@@ -22,7 +22,7 @@ License: MIT
 
 import importlib.metadata
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Optional
 
 from .device import Device
 
@@ -72,9 +72,9 @@ class PluginManager:
 
     def __init__(self) -> None:
         """Initialize the plugin manager."""
-        self._registered_devices: Dict[str, Type[Device]] = {}
-        self._loaded_plugins: List[str] = []
-        self._failed_plugins: List[str] = []
+        self._registered_devices: dict[str, type[Device]] = {}
+        self._loaded_plugins: list[str] = []
+        self._failed_plugins: list[str] = []
 
         # Register built-in devices
         self._register_builtin_devices()
@@ -178,9 +178,9 @@ class PluginManager:
             )
 
         except ImportError as e:
-            raise PluginError(f"Cannot import plugin '{plugin_name}': {e}")
+            raise PluginError(f"Cannot import plugin '{plugin_name}': {e}") from e
         except Exception as e:
-            raise PluginError(f"Plugin loading failed for '{plugin_name}': {e}")
+            raise PluginError(f"Plugin loading failed for '{plugin_name}': {e}") from e
 
     def _validate_plugin(self, device_class: Any, plugin_name: str) -> None:
         """
@@ -256,7 +256,7 @@ class PluginManager:
         except Exception as e:
             raise PluginError(f"Failed to register device '{name}': {e}") from e
 
-    def get_available_devices(self) -> Dict[str, Type[Device]]:
+    def get_available_devices(self) -> dict[str, type[Device]]:
         """
         Get all registered device types.
 
@@ -274,7 +274,7 @@ class PluginManager:
         """
         return self._registered_devices.copy()
 
-    def get_device_class(self, name: str) -> Optional[Type[Device]]:
+    def get_device_class(self, name: str) -> Optional[type[Device]]:
         """
         Get a specific device class by name.
 
@@ -342,7 +342,7 @@ class PluginManager:
         except Exception as e:
             raise PluginError(f"Failed to create {device_type} device: {e}") from e
 
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """
         Get information about loaded plugins and registration status.
 

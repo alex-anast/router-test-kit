@@ -228,7 +228,7 @@ class TestSSHConnection:
         """Test that occupied decorator prevents method execution."""
         self.ssh_conn._is_occupied = True
 
-        with pytest.raises(Exception):  # ConnectionRefusedError or similar
+        with pytest.raises(ConnectionRefusedError):
             self.ssh_conn.connect(self.mock_device, self.destination_ip)
 
     @patch("router_test_kit.connection.time.time")
@@ -437,9 +437,9 @@ class TestTelnetConnection:
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
 
         # Mock connection failure
-        mock_telnet_instance.open.side_effect = Exception("Connection failed")
+        mock_telnet_instance.open.side_effect = OSError("Connection failed")
 
-        with pytest.raises(Exception):
+        with pytest.raises(OSError):
             self.telnet_conn.connect(self.mock_device, self.destination_ip)
 
     def test_is_connected_true(self):

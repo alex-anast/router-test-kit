@@ -48,7 +48,7 @@ import telnetlib
 import time
 import warnings
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import paramiko
 
@@ -213,7 +213,7 @@ class Connection(ABC):
     def write_command(
         self,
         command: str,
-        expected_prompt_pattern: Optional[List[str]] = None,
+        expected_prompt_pattern: Optional[list[str]] = None,
         timeout: Optional[int] = None,
     ) -> Optional[str]:
         """
@@ -465,7 +465,7 @@ class Connection(ABC):
             f"IP {ip_addr} with netmask {netmask} deleted from interface {interface_name}"
         )
 
-    def _get_interfaces(self) -> Optional[List[List[str]]]:
+    def _get_interfaces(self) -> Optional[list[list[str]]]:
         """
         Gets a list of all interfaces on the device.
         """
@@ -507,7 +507,7 @@ class Connection(ABC):
     @check_device_type("oneos")
     def unload_config(
         self,
-        unload_specific_commands: Optional[List[str]] = None,
+        unload_specific_commands: Optional[list[str]] = None,
         check_is_empty: bool = False,
     ) -> None:
         """
@@ -601,7 +601,7 @@ class Connection(ABC):
         )
 
     def is_config_empty(
-        self, configuration: str, except_lines: Optional[List[str]] = None
+        self, configuration: str, except_lines: Optional[list[str]] = None
     ) -> bool:
         """
         Checks if the configuration of the device is fully empty and return boolean.
@@ -688,7 +688,7 @@ class Connection(ABC):
         self.write_command(full_command + destination_ip)
 
     @check_device_type("oneos")
-    def reconfigure(self, commands_list: List[str]) -> None:
+    def reconfigure(self, commands_list: list[str]) -> None:
         """
         Reconfigures a OneOS device with a list of commands.
         The list of commands is expected to include the exact commands
@@ -826,7 +826,7 @@ class SSHConnection(Connection):
     def write_command(
         self,
         command: str,
-        expected_prompt_pattern: Optional[List[str]] = None,
+        expected_prompt_pattern: Optional[list[str]] = None,
         timeout: Optional[int] = None,
     ) -> Optional[str]:
         """
@@ -917,7 +917,7 @@ class SSHConnection(Connection):
                     data = self.ssh_channel.recv(1024).decode("utf-8")
                     if self.prompt_symbol and self.prompt_symbol in data:
                         break
-                except:
+                except (OSError, UnicodeDecodeError):
                     pass
 
             if retries_timeout > 0 and time.time() - start_time > retries_timeout:
@@ -995,7 +995,7 @@ class TelnetConnection(Connection):
         return self
 
     def _write_credentials(
-        self, list_str_to_expect: List[str], str_to_write: str
+        self, list_str_to_expect: list[str], str_to_write: str
     ) -> None:
         if self.resulting_telnet_connection is not None:
             n, match, previous_text = self.resulting_telnet_connection.expect(

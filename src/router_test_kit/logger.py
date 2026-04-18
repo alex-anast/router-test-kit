@@ -24,25 +24,23 @@ def setup_logger() -> None:
     The log messages are formatted to include the date and time, the name of the logger, the level of the log message, and the log message itself.
     The file handler is added to the logger.
     """
-    # Create a logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    # Create a logs directory if it doesn't exist using pathlib
+    # Guard against duplicate handlers when called multiple times
+    if any(isinstance(h, logging.FileHandler) for h in logger.handlers):
+        return
+
     logs_dir = Path("logs")
     logs_dir.mkdir(exist_ok=True)
 
-    # Define a handler to output log messages to a file
     log_file = logs_dir / "debug.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
 
-    # Define a formatter to output log messages with date and time
     formatter = logging.Formatter(
         "%(filename)s - %(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     file_handler.setFormatter(formatter)
-
-    # Add file handler to the logger
     logger.addHandler(file_handler)

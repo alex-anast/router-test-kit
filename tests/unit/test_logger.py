@@ -94,8 +94,6 @@ class TestSetupLogger(unittest.TestCase):
 
         self.assertIsNotNone(file_handler)
 
-        # Handler should point to debug.log
-        expected_path = str(Path("logs") / "debug.log")
         self.assertIn("debug.log", file_handler.baseFilename)
 
     def test_setup_logger_file_handler_debug_level(self):
@@ -167,9 +165,7 @@ class TestSetupLogger(unittest.TestCase):
         setup_logger()
         final_handler_count = len(logging.getLogger("router_test_kit.logger").handlers)
 
-        # Should not add duplicate handlers
-        # Note: This test assumes the function doesn't add duplicate handlers
-        # If it does, the implementation should be improved
+        self.assertEqual(initial_handler_count, final_handler_count)
 
     def test_setup_logger_logs_directory_already_exists(self):
         """Test setup_logger when logs directory already exists."""
