@@ -5,8 +5,7 @@ command execution, and system operations. It includes functions for:
 
 - Network operations (ping, packet loss analysis, IP validation)
 - File operations (JSON loading, SCP transfers)
-- System commands (shell command execution)  
-- Test utilities (pytest integration, data processing)
+- System commands (shell command execution)
 
 The utilities are designed to support router and network device testing
 scenarios, providing common operations needed across different test cases.
@@ -17,31 +16,27 @@ Functions:
     - get_packet_loss(): Extract packet loss percentage from ping output
     - is_valid_ip(): Validate IP address strings (IPv4/IPv6)
     - get_interface_ips(): Get IP addresses assigned to network interfaces
-    
+
     System Utilities:
     - execute_shell_commands_on_host(): Execute shell commands with error handling
     - scp_file_to_home_dir(): Transfer files using SCP
-    
+
     Data Utilities:
     - load_json(): Load and parse JSON configuration files
     - print_banner(): Print formatted banner messages
-    
-    Test Utilities:
-    - get_tests(): Collect pytest test items
-    - TestCollector: Pytest plugin for test collection
 
 Example:
     Common usage patterns:
-    
+
     ```python
     from router_test_kit.static_utils import ping, get_packet_loss, is_valid_ip
-    
+
     # Network testing
     result = ping("8.8.8.8", count=3)
     loss = get_packet_loss(result)
     print(f"Packet loss: {loss}%")
-    
-    # IP validation  
+
+    # IP validation
     if is_valid_ip("192.168.1.1"):
         print("Valid IP address")
     ```
@@ -55,38 +50,15 @@ Note:
 import ipaddress
 import json
 import logging
-import os
 import re
 import subprocess
-import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-import pytest
-
-# Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from router_test_kit.connection import TelnetConnection
 from router_test_kit.device import HostDevice
 
 logger = logging.getLogger(__name__)
-
-
-class TestCollector:
-    """A pytest plugin to collect test items."""
-
-    def pytest_collection_finish(self, session: pytest.Session) -> None:
-        """Called after test collection has been completed and modified."""
-        self.test_items = session.items
-
-
-def get_tests() -> List[pytest.Item]:
-    """Collect test items using pytest collection."""
-    collector = TestCollector()
-    pytest.main(
-        ["--no-header", "--no-summary", "-qq", "--collect-only"], plugins=[collector]
-    )
-    return collector.test_items
 
 
 def load_json(file_path: str) -> Dict[str, Any]:

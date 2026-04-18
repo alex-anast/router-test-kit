@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from router_test_kit.static_utils import (
-    get_packet_loss, 
+    get_packet_loss,
     is_valid_ip,
     load_json,
     print_banner,
@@ -22,7 +22,6 @@ from router_test_kit.static_utils import (
     set_interface_ip,
     del_interface_ip,
     scp_file_to_home_dir,
-    get_tests,
 )
 
 
@@ -399,27 +398,6 @@ class TestPrintBannerEdgeCases:
         
         # Should handle multiline messages
         assert mock_logger.info.call_count > 0
-
-
-class TestGetTests:
-    """Test cases for get_tests function."""
-    
-    @patch('pytest.main')
-    def test_get_tests_collection(self, mock_pytest_main):
-        """Test get_tests function collects pytest items."""
-        # Mock a test collector with items
-        mock_collector = MagicMock()
-        mock_collector.test_items = ["test1", "test2", "test3"]
-        
-        with patch('router_test_kit.static_utils.TestCollector', return_value=mock_collector):
-            result = get_tests()
-            
-        # Verify pytest.main was called with collection arguments
-        mock_pytest_main.assert_called_once()
-        args = mock_pytest_main.call_args[0][0]
-        assert "--collect-only" in args
-        assert "--no-header" in args
-        assert result == ["test1", "test2", "test3"]
 
 
 class TestScpFileToHomeDirErrorCases:
