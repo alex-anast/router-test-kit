@@ -39,7 +39,7 @@ Plugin System:
     device = manager.create_device("juniper", "admin", "password")
     ```
 
-Author: Router Test Kit Development Team
+Author: Alexandros Anastasiou
 License: MIT
 Version: 0.2.0
 """
@@ -54,7 +54,7 @@ logging.basicConfig(
 
 # Package metadata
 __version__ = "0.2.0"
-__author__ = "Router Test Kit Development Team"
+__author__ = "Alexandros Anastasiou"
 __license__ = "MIT"
 __email__ = "anastasioyaa@gmail.com"
 
