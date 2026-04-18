@@ -43,8 +43,6 @@ import logging
 import os
 import re
 import socket
-import sys
-import telnetlib
 import time
 import warnings
 from abc import ABC, abstractmethod
@@ -52,8 +50,13 @@ from typing import Optional, Union
 
 import paramiko
 
-# Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+# Suppress the telnetlib import-time DeprecationWarning (Python 3.11+).
+# A per-instantiation warning is issued by TelnetConnection.__init__ instead,
+# so users who only use SSH see no noise at all.
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import telnetlib
+
 from router_test_kit.device import Device
 
 logger = logging.getLogger(__name__)

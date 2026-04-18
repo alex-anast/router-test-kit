@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Python compatibility is now capped at `<3.13` while `telnetlib` is the Telnet backend.
+
+### Deprecated
+- `TelnetConnection` and `TelnetCLIConnection` emit a `DeprecationWarning` on instantiation. Migrate to `SSHConnection` for future compatibility.
 
 ### Fixed
 

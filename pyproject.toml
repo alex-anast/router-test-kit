@@ -11,7 +11,7 @@ authors = [
     {name = "Alexandros Anastasiou", email = "anastasioyaa@gmail.com"}
 ]
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",

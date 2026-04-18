@@ -37,6 +37,8 @@ with SSHConnection() as conn:
 | RADIUS server | `RADIUSServer` | SSH |
 | Local host | `HostDevice` | subprocess |
 
+**Note:** Telnet support uses the standard-library `telnetlib` module, which was removed in Python 3.13. This package requires Python `>=3.9,<3.13` until a replacement lands. `TelnetConnection` emits a `DeprecationWarning` on instantiation — prefer `SSHConnection` where possible.
+
 ## Plugin system
 
 New device types are registered via Python entry points. To add a device type from an external package, declare it in the package's `pyproject.toml`:
