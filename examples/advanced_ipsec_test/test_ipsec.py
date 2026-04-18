@@ -28,12 +28,13 @@ import re
 import socket
 import sys
 from time import sleep
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 import pytest
 
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+import src.static_utils
 from conftest import (  # Colouring  # Paths and file names  # Info from JSON
     BSA_DIR,
     GREEN,
@@ -52,8 +53,6 @@ from conftest import (  # Colouring  # Paths and file names  # Info from JSON
     YELLOW,
     json_config,
 )
-
-import src.static_utils
 from src.connection import TelnetConnection
 from src.device import OneOS6Device, RADIUSServer
 
@@ -64,7 +63,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.generic
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_GENERIC)
-def test_ipsec_generic(setup_marker: str, description: str, keywords: List[str], sudo_password) -> None:
+def test_ipsec_generic(setup_marker: str, description: str, keywords: list[str], sudo_password) -> None:
     src.static_utils.print_banner(f"GENERIC - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_generic.__name__, setup_marker)
     local_radius_connection_used = None
@@ -121,7 +120,7 @@ def test_ipsec_generic(setup_marker: str, description: str, keywords: List[str],
 @pytest.mark.algorithms
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_ALGORITHMS)
-def test_ipsec_algorithms(setup_marker: str, description: str, keywords: List[str], sudo_password) -> None:
+def test_ipsec_algorithms(setup_marker: str, description: str, keywords: list[str], sudo_password) -> None:
     src.static_utils.print_banner(f"ALGORITHMS - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_algorithms.__name__, setup_marker)
 
@@ -213,7 +212,7 @@ def assert_algorithms(connection: "TelnetConnectionIPSEC", ref_data: str) -> Non
     assert_dpd(connection, ref_data)
 
 
-def assert_config_is_matching(connection: "TelnetConnectionIPSEC", encr_info: Dict[str, str]) -> None:
+def assert_config_is_matching(connection: "TelnetConnectionIPSEC", encr_info: dict[str, str]) -> None:
     """
     Checks the current configuration of the connection and compares it with the expected encryption information.
 
@@ -338,7 +337,7 @@ def assert_show_policy_interface(connection: "TelnetConnectionIPSEC", expected_d
     logger.info(f"{GREEN}{OK}show policy-interface - {connection.destination_device.hostname}{NC}")
 
 
-def assert_data_test(nbr_packets_expected: int, test_commands: List[str], setup_info: Tuple[str, str], *connections: "TelnetConnectionIPSEC") -> None:
+def assert_data_test(nbr_packets_expected: int, test_commands: list[str], setup_info: tuple[str, str], *connections: "TelnetConnectionIPSEC") -> None:
     if nbr_packets_expected is None and test_commands is None:
         for connection in connections:
             logger.info(f"{YELLOW}{SKIPPED}Data Test for device {connection.destination_device.hostname}{NC}")
@@ -360,7 +359,7 @@ def assert_data_test(nbr_packets_expected: int, test_commands: List[str], setup_
     sleep(5)
 
     reference_data = {}
-    for i, connection in enumerate(connections, start=1):
+    for i, _connection in enumerate(connections, start=1):
         vm_name = f"VM_{chr(64 + i)}"  # This will generate VM_A, VM_B, VM_C, etc.
         reference_data[vm_name] = get_reference_data(setup_info, vm_name, "show_crypto_ipsec_sa_data")
 
@@ -418,7 +417,7 @@ def assert_show_crypto_acl(connection: "TelnetConnectionIPSEC", expected_data: O
     logger.info(f"{GREEN}{OK}show crypto acl - {connection.destination_device.hostname}{NC}")
 
 
-def assert_nbr_active_sa(*info: Tuple["TelnetConnectionIPSEC", str], timeout: int = 10) -> None:
+def assert_nbr_active_sa(*info: tuple["TelnetConnectionIPSEC", str], timeout: int = 10) -> None:
     # Parse pairs
     connection_data = {}
     for connection, reference_data in info:
@@ -464,8 +463,8 @@ def assert_nbr_active_sa(*info: Tuple["TelnetConnectionIPSEC", str], timeout: in
 def assert_show_crypto_ipsec_sa(
     connection: "TelnetConnectionIPSEC",
     expected_data: str,
-    data_remove_lines_containing: Optional[Set] = None,
-    expected_data_remove_lines_containing: Optional[Set] = None,
+    data_remove_lines_containing: Optional[set] = None,
+    expected_data_remove_lines_containing: Optional[set] = None,
 ) -> None:
     data = connection.parse_show_crypto_ipsec_sa(remove_lines_containing=data_remove_lines_containing)
     reference_data = _parse_expected_data(expected_data, expected_data_remove_lines_containing)
@@ -474,11 +473,11 @@ def assert_show_crypto_ipsec_sa(
     logger.info(f"{GREEN}{OK}show crypto ipsec sa - {connection.destination_device.hostname}{NC}")
 
 
-def clean_lines(data: str, from_id: Optional[int]=None, to_id: Optional[int]=None) -> List[str]:
-    return [line for line in (l.strip() for l in data.split('\n')[from_id:to_id]) if line]
+def clean_lines(data: str, from_id: Optional[int]=None, to_id: Optional[int]=None) -> list[str]:
+    return [line for line in (ln.strip() for ln in data.split('\n')[from_id:to_id]) if line]
 
 
-def get_script_data(setup_info: Tuple[str, str]) -> Tuple[int, List[str]]:
+def get_script_data(setup_info: tuple[str, str]) -> tuple[int, list[str]]:
     test_name, setup_marker = setup_info
     data_file = json_config[test_name][setup_marker].get("data_file")
     if data_file is not None:
@@ -500,7 +499,7 @@ def cleanup_connections(*connections: "TelnetConnectionIPSEC") -> None:
             cleanup_device(connection)
 
 
-def cleanup_interfaces(password, interface_info: List[Dict[str, str]]) -> None:
+def cleanup_interfaces(password, interface_info: list[dict[str, str]]) -> None:
     for interface in interface_info:
         try:
             intf_name = interface["name"]
@@ -526,12 +525,12 @@ def cleanup_radius(connection: TelnetConnection) -> None:
     )
 
 
-def get_successful_pings(commands: List[str]) -> int:
+def get_successful_pings(commands: list[str]) -> int:
     response = src.static_utils.execute_shell_commands_on_host(commands, quiet=False)
     return sum("bytes from" in line for line in response.split('\n'))
 
 
-def load_json(json_config_path: Optional[str] = None) -> Dict:
+def load_json(json_config_path: Optional[str] = None) -> dict:
     try:
         if json_config_path is None:
             root_path = os.path.dirname(os.path.abspath(__file__))
@@ -541,12 +540,12 @@ def load_json(json_config_path: Optional[str] = None) -> Dict:
         with open(json_config_path) as f:
             json_config = json.load(f)
         return json_config
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         logger.error(f"File not found at path {json_config_path}")
-        raise FileNotFoundError
-    except json.JSONDecodeError:
+        raise FileNotFoundError(f"File not found: {json_config_path}") from e
+    except json.JSONDecodeError as e:
         logger.error(f"File {json_config_path} is not a valid JSON file")
-        raise json.JSONDecodeError
+        raise json.JSONDecodeError(e.msg, e.doc, e.pos) from e
 
 
 def cleanup_device(connection: "TelnetConnectionIPSEC", dont_disconnect=False) -> None:
@@ -582,7 +581,7 @@ def cleanup_device(connection: "TelnetConnectionIPSEC", dont_disconnect=False) -
     connection.disconnect() if not dont_disconnect else None
 
 
-def get_reference_data(setup_info: Tuple[str, str], vm_name: str, show_command: str) -> Optional[str]:
+def get_reference_data(setup_info: tuple[str, str], vm_name: str, show_command: str) -> Optional[str]:
     test_name, setup_marker = setup_info
     reference_file_name = json_config[test_name][setup_marker][vm_name].get(show_command)
     if reference_file_name is None:
@@ -636,7 +635,7 @@ def check_and_activate_license(connection: "TelnetConnectionIPSEC", vm_name: str
                 ])
 
 
-def setup_connection(setup_info: Tuple[str, str], vm_nbr: int, check_is_empty=True) -> "TelnetConnectionIPSEC":
+def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=True) -> "TelnetConnectionIPSEC":
     """
     check_is_empty: When developers kill the test, they leave config traces to the VMs' configs
                     With an overhead of ~5s, if this parameter is set to True, it ensures that the config is empty
@@ -679,7 +678,7 @@ def setup_connection(setup_info: Tuple[str, str], vm_nbr: int, check_is_empty=Tr
     return connection
 
 
-def setup_connections(setup_info: Tuple[str, str]) -> Tuple[
+def setup_connections(setup_info: tuple[str, str]) -> tuple[
     "TelnetConnectionIPSEC",            # VM_A
     "TelnetConnectionIPSEC",            # VM_B
     Optional["TelnetConnectionIPSEC"],  # VM_C
@@ -702,7 +701,7 @@ def setup_connections(setup_info: Tuple[str, str]) -> Tuple[
     return connection_a, connection_b, connection_c, connection_d
 
 
-def setup_interfaces(password: str) -> List[Dict[str, str]]:
+def setup_interfaces(password: str) -> list[dict[str, str]]:
     interface_info = []
     for _, interface in json_config["HOST"]["interfaces"].items():
         ip = interface.get("ip", "")
@@ -722,7 +721,7 @@ def setup_interfaces(password: str) -> List[Dict[str, str]]:
     return interface_info
 
 
-def setup_radius(setup_info: Tuple[str, str]) -> TelnetConnection:
+def setup_radius(setup_info: tuple[str, str]) -> TelnetConnection:
     test_name, setup_marker = setup_info
     radius_preference = json_config[test_name][setup_marker]["radius_preference"]
     if radius_preference == "local":
@@ -802,7 +801,7 @@ def _get_crypto_ikev2_proposal_help(connection: "TelnetConnectionIPSEC", name: s
     return response
 
 
-def _get_crypto_ikev2_proposal_subconfig(config: str) -> Tuple[List[str], str]:
+def _get_crypto_ikev2_proposal_subconfig(config: str) -> tuple[list[str], str]:
     found = False
     lines_of_interest = []
     for line in config.split("\n"):
@@ -821,7 +820,7 @@ def _get_crypto_ikev2_proposal_subconfig(config: str) -> Tuple[List[str], str]:
     return lines_of_interest, crypto_ikev2_proposal_name
 
 
-def _parse_encr_info(encr_info: str) -> Dict[str, str]:
+def _parse_encr_info(encr_info: str) -> dict[str, str]:
     """
     Comes in as:
         Encr: AES-CBC, keysize: 256, PRF: SHA512, Hash: SHA512, DH Grp: 16, Auth sign: PSK, Auth verify: PSK
@@ -839,7 +838,7 @@ def _parse_encr_info(encr_info: str) -> Dict[str, str]:
     }
 
 
-def _check_diff_in_files(data: List[str], reference_data: List[str], test_type: str, device_name: str = None) -> None:
+def _check_diff_in_files(data: list[str], reference_data: list[str], test_type: str, device_name: str = None) -> None:
     data = _clean_data(data)
     reference_data = _clean_data(reference_data)
 
@@ -864,7 +863,7 @@ def _check_diff_in_files(data: List[str], reference_data: List[str], test_type: 
         raise AssertionError
 
 
-def _parse_expected_data(expected_data: str, remove_lines_containing: Set[str] = None) -> List[str]:
+def _parse_expected_data(expected_data: str, remove_lines_containing: set[str] = None) -> list[str]:
     # Strip symbols and empty lines
     reference_data = [line.strip() for line in expected_data.split("\n") if line.strip()]
     # Remove lines containing certain strings, if remove_lines_containing is provided
@@ -873,7 +872,7 @@ def _parse_expected_data(expected_data: str, remove_lines_containing: Set[str] =
     return sorted(reference_data)
 
 
-def _clean_data(data) -> List[str]:
+def _clean_data(data) -> list[str]:
     cleaned_data = []
     for line in data:
         items = line.split()
@@ -941,7 +940,7 @@ class TelnetConnectionIPSEC(TelnetConnection):
         return nbr_active_sa
 
     @get_response("show crypto ipsec sa")
-    def parse_show_crypto_ipsec_sa(self, response: Optional[str] = None, remove_lines_containing: Optional[Set[str]] = None) -> List[str]:
+    def parse_show_crypto_ipsec_sa(self, response: Optional[str] = None, remove_lines_containing: Optional[set[str]] = None) -> list[str]:
         """
         Parses the output of `show crypto ipsec sa` and returns a list of strings.
 
@@ -969,7 +968,7 @@ class TelnetConnectionIPSEC(TelnetConnection):
         tunnel_pattern = re.compile(r'Virtual-IpsecTunnel \d*')
 
 
-        lines = [line for line in (l.strip() for l in response.split("\n")) if line]
+        lines = [line for line in (ln.strip() for ln in response.split("\n")) if line]
 
         # Replace occurrences of IPs and tunnel numbers
         masked_lines = [tunnel_pattern.sub('Virtual-IpsecTunnel XX', ip_pattern.sub("192.168.XX.XX", line)) for line in lines]
@@ -999,14 +998,14 @@ class TelnetConnectionIPSEC(TelnetConnection):
         self.write_command("clear crypto counters")
 
     @get_response("show crypto acl")
-    def parse_show_crypto_acl(self, response: Optional[str] = None) -> Optional[List[str]]:
+    def parse_show_crypto_acl(self, response: Optional[str] = None) -> Optional[list[str]]:
         if len(response.split('\n')) <= 3:
             return ""
         else:
             return clean_lines(response, from_id=2, to_id=-2)
 
     @get_response("show policy-interface")
-    def parse_show_policy_interface(self, response: Optional[str] = None) -> Optional[List[str]]:
+    def parse_show_policy_interface(self, response: Optional[str] = None) -> Optional[list[str]]:
         if len(response.split('\n')) <= 2:
             return ""
         else:
