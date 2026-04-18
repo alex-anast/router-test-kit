@@ -69,6 +69,8 @@ juniper = manager.create_device("juniper", username="admin", password="secret")
 
 Full API reference and usage guide: [alex-anast.github.io/router-test-kit](https://alex-anast.github.io/router-test-kit/)
 
+Design overview (device hierarchy, connection abstraction, plugin discovery): [docs/architecture.md](docs/architecture.md)
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding conventions, and the release process.
