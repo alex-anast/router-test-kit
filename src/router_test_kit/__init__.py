@@ -16,10 +16,10 @@ Quick Start:
     ```python
     from router_test_kit.device import LinuxDevice
     from router_test_kit.connection import SSHConnection
-    
+
     # Create device and establish connection
     device = LinuxDevice(username="admin", password="secure_pass")
-    
+
     with SSHConnection() as conn:
         conn.connect(device, "192.168.1.100")
         result = conn.exec("ip route show")
@@ -28,13 +28,13 @@ Quick Start:
 
 Plugin System:
     The package supports plugins for extending device support:
-    
+
     ```python
     from router_test_kit.plugins import get_plugin_manager
-    
+
     manager = get_plugin_manager()
     manager.load_plugins()
-    
+
     # Use plugin-provided device types
     device = manager.create_device("juniper", "admin", "password")
     ```
@@ -48,8 +48,7 @@ import logging
 
 # Set up basic logging configuration
 logging.basicConfig(
-    level=logging.WARNING,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.WARNING, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 # Package metadata
@@ -59,10 +58,10 @@ __license__ = "MIT"
 __email__ = "anastasioyaa@gmail.com"
 
 # Import main classes for convenience
-from .device import Device, LinuxDevice, OneOS6Device, RADIUSServer, HostDevice
 from .connection import Connection, SSHConnection, TelnetConnection
-from .static_utils import print_banner, ping, get_packet_loss, is_valid_ip
-from .plugins import get_plugin_manager, auto_load_plugins, PluginManager, PluginError
+from .device import Device, HostDevice, LinuxDevice, OneOS6Device, RADIUSServer
+from .plugins import PluginError, PluginManager, auto_load_plugins, get_plugin_manager
+from .static_utils import get_packet_loss, is_valid_ip, ping, print_banner
 
 # Auto-load plugins when package is imported
 try:
@@ -75,26 +74,23 @@ except (ImportError, AttributeError, PluginError) as e:
 __all__ = [
     # Core classes
     "Device",
-    "LinuxDevice", 
+    "LinuxDevice",
     "OneOS6Device",
     "RADIUSServer",
     "HostDevice",
     "Connection",
     "SSHConnection",
     "TelnetConnection",
-    
     # Utilities
     "print_banner",
     "ping",
     "get_packet_loss",
     "is_valid_ip",
-    
     # Plugin system
     "PluginManager",
     "PluginError",
     "get_plugin_manager",
     "auto_load_plugins",
-    
     # Metadata
     "__version__",
     "__author__",

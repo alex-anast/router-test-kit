@@ -63,33 +63,33 @@ logger = logging.getLogger(__name__)
 
 def load_json(file_path: str) -> Dict[str, Any]:
     """Load and parse a JSON file.
-    
+
     Args:
         file_path: Path to the JSON file
-        
+
     Returns:
         Parsed JSON data as dictionary
     """
-    with open(file_path, encoding='utf-8') as json_file:
+    with open(file_path, encoding="utf-8") as json_file:
         data = json.load(json_file)
     return data
 
 
 def print_banner(*messages: str, banner_legth: int = 80) -> None:
     """Print formatted banner messages with decorative borders.
-    
+
     Creates a visually appealing banner by surrounding the provided messages
     with asterisk borders. Each message is centered within the banner width.
-    
+
     Args:
         *messages: Variable number of string messages to display in the banner
         banner_legth: Width of the banner in characters. Defaults to 80.
-        
+
     Example:
         ```python
         print_banner("Welcome", "Router Test Suite", "Version 1.0")
         ```
-        
+
         Output:
         ```
         ********************************************************************************
@@ -98,7 +98,7 @@ def print_banner(*messages: str, banner_legth: int = 80) -> None:
                                       Version 1.0
         ********************************************************************************
         ```
-        
+
     Note:
         Messages are logged using the logger.info() method, so they will appear
         in both console output and log files based on logging configuration.
@@ -114,12 +114,12 @@ def execute_shell_commands_on_host(
     commands: List[str], print_response: bool = False, quiet: bool = False
 ) -> Optional[str]:
     """Execute shell commands on the host system.
-    
+
     Args:
         commands: List of commands to execute
         print_response: Whether to log successful command execution
         quiet: Whether to suppress error logging
-        
+
     Returns:
         Combined output of all commands, or None if no output
     """
@@ -132,7 +132,7 @@ def execute_shell_commands_on_host(
                 capture_output=True,
                 text=True,
                 timeout=30,
-                check=False
+                check=False,
             )
 
             if result.returncode != 0 and not quiet:
@@ -186,10 +186,10 @@ def del_interface_ip(
 
 def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
     """Get IPv4 and IPv6 addresses assigned to a network interface.
-    
+
     Args:
         interface: Name of the network interface
-        
+
     Returns:
         Tuple of (IPv4 addresses, IPv6 addresses)
     """
@@ -204,18 +204,16 @@ def get_interface_ips(interface: str) -> Tuple[List[str], List[str]]:
     return ipv4_matches if ipv4_matches else [], ipv6_matches if ipv6_matches else []
 
 
-def reboot_device(
-    connection: TelnetConnection, timeout: int = 60
-) -> TelnetConnection:
+def reboot_device(connection: TelnetConnection, timeout: int = 60) -> TelnetConnection:
     """Reboot a device and wait for it to come back online.
-    
+
     Args:
         connection: Active telnet connection to device
         timeout: Maximum time to wait for device to come back online
-        
+
     Returns:
         Renewed connection to the device
-        
+
     Raises:
         ConnectionError: If connection is not established
         TimeoutError: If device doesn't come back online within timeout
@@ -243,11 +241,11 @@ def reboot_device(
 
 def ping(destination_ip: str, count: int = 1) -> Optional[str]:
     """Ping a destination and return the result.
-    
+
     Args:
         destination_ip: IP address to ping
         count: Number of ping packets to send
-        
+
     Returns:
         Ping command output, or None if command failed
     """
@@ -256,13 +254,13 @@ def ping(destination_ip: str, count: int = 1) -> Optional[str]:
 
 def get_packet_loss(response: str) -> Optional[str]:
     """Extract packet loss percentage from ping command output.
-    
+
     Args:
         response: Output from ping command
-        
+
     Returns:
         Packet loss percentage as string, or None if not found
-        
+
     Example:
         '2 packets transmitted, 2 received, 0% packet loss, time 11ms'
         Returns '0'
@@ -283,10 +281,10 @@ def get_packet_loss(response: str) -> Optional[str]:
 
 def is_valid_ip(ip: str) -> bool:
     """Check if a string represents a valid IP address (IPv4 or IPv6).
-    
+
     Args:
         ip: String to validate as IP address
-        
+
     Returns:
         True if valid IP address, False otherwise
     """
@@ -299,12 +297,12 @@ def is_valid_ip(ip: str) -> bool:
 
 def scp_file_to_home_dir(local_file_path: str, user_at_ip: str, password: str) -> None:
     """Copy a local file to remote host's home directory using SCP.
-    
+
     Args:
         local_file_path: Path to local file to copy
         user_at_ip: Remote destination in format 'user@ip'
         password: Password for remote authentication
-        
+
     Raises:
         FileNotFoundError: If local file or remote path is invalid
         ValueError: If unknown error occurs during transfer
@@ -331,6 +329,7 @@ def scp_file_to_home_dir(local_file_path: str, user_at_ip: str, password: str) -
         raise FileNotFoundError
     else:
         logger.critical(
-            "Unknown error occurred while copying file to the device. Got response: %s", response
+            "Unknown error occurred while copying file to the device. Got response: %s",
+            response,
         )
         raise ValueError("SCP transfer failed")

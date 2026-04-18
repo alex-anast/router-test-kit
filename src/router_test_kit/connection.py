@@ -18,15 +18,15 @@ Classes:
 
 Example:
     Basic SSH connection usage:
-    
+
     ```python
     from router_test_kit.connection import SSHConnection
     from router_test_kit.device import LinuxDevice
-    
+
     # Create device and connection
     device = LinuxDevice(username="admin", password="password")
     conn = SSHConnection(timeout=30)
-    
+
     # Connect and execute commands
     conn.connect(device, "192.168.1.1")
     result = conn.write_command("show version")
@@ -61,39 +61,39 @@ logger = logging.getLogger(__name__)
 
 class Connection(ABC):
     """Abstract base class for network connections to remote devices.
-    
+
     This class defines the interface that all connection implementations must follow.
     It provides common functionality for connection management including timeout handling,
     device association, and connection state tracking.
-    
+
     The class includes decorators for ensuring connection exclusivity and device type
     validation, which are used by concrete implementations.
-    
+
     Attributes:
         destination_device (Optional[Device]): The target device for this connection
         destination_ip (Optional[str]): IP address of the destination device
         timeout (int): Connection timeout in seconds (default: 10)
         prompt_symbol (Optional[str]): Expected command prompt symbol
-        
+
     Private Attributes:
         _is_occupied (bool): Indicates if connection is in use by another process
-        
+
     Example:
         This is an abstract class and cannot be instantiated directly.
         Use concrete implementations like SSHConnection:
-        
+
         ```python
         conn = SSHConnection(timeout=30)
         conn.connect(device, "192.168.1.1")
         ```
     """
-    
+
     def __init__(self, timeout: int = 10):
         """Initialize a new connection instance.
-        
+
         Args:
             timeout: Connection timeout in seconds. Defaults to 10.
-            
+
         Note:
             This is an abstract class and should not be instantiated directly.
             Use concrete implementations like SSHConnection or TelnetConnection.
@@ -108,19 +108,21 @@ class Connection(ABC):
         self.prompt_symbol = None
 
     @abstractmethod
-    def connect(self, destination_device: "Device", destination_ip: str) -> "Connection":
+    def connect(
+        self, destination_device: "Device", destination_ip: str
+    ) -> "Connection":
         """Establish a connection to the specified device.
-        
+
         This method must be implemented by concrete connection classes to establish
         the actual network connection to the target device.
-        
+
         Args:
             destination_device: The device object containing connection credentials
             destination_ip: IP address of the target device
-            
+
         Returns:
             Connection: This connection instance for method chaining
-            
+
         Raises:
             ConnectionAbortedError: If the connection cannot be established
             TimeoutError: If the connection attempt times out
@@ -130,10 +132,10 @@ class Connection(ABC):
     @abstractmethod
     def disconnect(self) -> None:
         """Close the connection to the remote device.
-        
+
         This method must be implemented by concrete connection classes to properly
         close and clean up the network connection.
-        
+
         Note:
             After calling this method, the connection object should not be used
             for further communication until connect() is called again.
@@ -714,7 +716,7 @@ class SSHConnection(Connection):
     """
     Represents a secure SSH connection to a remote device.
     This is the recommended secure alternative to TelnetConnection.
-    
+
     Uses the paramiko library to establish and manage secure SSH connections.
     Supports both password authentication and key-based authentication.
     """
@@ -725,17 +727,19 @@ class SSHConnection(Connection):
         self.ssh_channel: Optional[paramiko.Channel] = None
 
     @Connection.check_occupied
-    def connect(self, destination_device: "Device", destination_ip: str) -> "Connection":
+    def connect(
+        self, destination_device: "Device", destination_ip: str
+    ) -> "Connection":
         """
         Establishes an SSH connection to the destination device.
-        
+
         Args:
             destination_device (Device): The device object containing credentials
             destination_ip (str): The IP address of the destination device
-            
+
         Returns:
             Connection: This connection object for method chaining
-            
+
         Raises:
             ConnectionAbortedError: If the SSH connection could not be established
         """
@@ -755,7 +759,7 @@ class SSHConnection(Connection):
                 password=destination_device.password,
                 timeout=self.timeout,
                 look_for_keys=False,  # Don't look for SSH keys unless specifically configured
-                allow_agent=False     # Don't use SSH agent
+                allow_agent=False,  # Don't use SSH agent
             )
 
             # Create an interactive shell channel
@@ -767,9 +771,13 @@ class SSHConnection(Connection):
             self._flush_channel()
 
             if not self.is_connected:
-                raise ConnectionAbortedError("SSH connection established but channel failed")
+                raise ConnectionAbortedError(
+                    "SSH connection established but channel failed"
+                )
 
-            logger.info(f"SSH connected to {self.destination_device.hostname} at {self.destination_ip}")
+            logger.info(
+                f"SSH connected to {self.destination_device.hostname} at {self.destination_ip}"
+            )
             return self
 
         except Exception as e:
@@ -799,7 +807,9 @@ class SSHConnection(Connection):
         if self.is_connected:
             raise ConnectionError("SSH connection could not be closed")
 
-        logger.info(f"SSH disconnected from {self.destination_device.hostname} at {self.destination_ip}")
+        logger.info(
+            f"SSH disconnected from {self.destination_device.hostname} at {self.destination_ip}"
+        )
 
     @property
     def is_connected(self) -> bool:
@@ -821,15 +831,15 @@ class SSHConnection(Connection):
     ) -> Optional[str]:
         """
         Sends a command via SSH and returns the response.
-        
+
         Args:
             command (str): The command to send
             expected_prompt_pattern (Optional[List[str]]): Regex patterns to wait for
             timeout (Optional[int]): Timeout in seconds
-            
+
         Returns:
             Optional[str]: The command response
-            
+
         Raises:
             ConnectionError: If SSH connection is not established
         """
@@ -844,7 +854,7 @@ class SSHConnection(Connection):
 
         # Send the command
         command_with_newline = command + "\n"
-        self.ssh_channel.send(command_with_newline.encode('utf-8'))
+        self.ssh_channel.send(command_with_newline.encode("utf-8"))
 
         # Read the response
         response_parts = []
@@ -853,16 +863,18 @@ class SSHConnection(Connection):
 
         while True:
             if time.time() - start_time > command_timeout:
-                logger.warning(f"Command '{command}' timed out after {command_timeout} seconds")
+                logger.warning(
+                    f"Command '{command}' timed out after {command_timeout} seconds"
+                )
                 break
 
             if self.ssh_channel.recv_ready():
                 try:
-                    data = self.ssh_channel.recv(4096).decode('utf-8')
+                    data = self.ssh_channel.recv(4096).decode("utf-8")
                     response_parts.append(data)
 
                     # Check if we have a complete response
-                    full_response = ''.join(response_parts)
+                    full_response = "".join(response_parts)
 
                     if expected_prompt_pattern:
                         # Check against expected patterns
@@ -882,7 +894,7 @@ class SSHConnection(Connection):
             else:
                 time.sleep(0.1)
 
-        return ''.join(response_parts) if response_parts else None
+        return "".join(response_parts) if response_parts else None
 
     @Connection.check_occupied
     def flush(self, time_interval: float = 0.1) -> None:
@@ -902,7 +914,7 @@ class SSHConnection(Connection):
             # Try to get current prompt
             if self.ssh_channel and self.ssh_channel.recv_ready():
                 try:
-                    data = self.ssh_channel.recv(1024).decode('utf-8')
+                    data = self.ssh_channel.recv(1024).decode("utf-8")
                     if self.prompt_symbol and self.prompt_symbol in data:
                         break
                 except:
@@ -919,11 +931,11 @@ class TelnetConnection(Connection):
     """
     Represents a Telnet connection, always originating from the Host device to another device.
     It uses the telnetlib library to establish and manage the connection.
-    
+
     .. deprecated:: 0.2.0
         TelnetConnection is deprecated due to security concerns. Telnet transmits data in plain text.
         Use SSHConnection instead for secure communication.
-        
+
     .. warning::
         This class will be removed in a future version. Please migrate to SSHConnection.
     """
@@ -936,7 +948,7 @@ class TelnetConnection(Connection):
             "TelnetConnection is deprecated and will be removed in a future version. "
             "Use SSHConnection instead for secure communication.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
         self.resulting_telnet_connection = telnetlib.Telnet()  # Not connected

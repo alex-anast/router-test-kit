@@ -4,7 +4,7 @@ Unit tests for router_test_kit.connection module.
 These tests focus on the SSH connection implementation using mocks.
 """
 
-from unittest.mock import MagicMock, patch, PropertyMock, call
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -152,7 +152,7 @@ class TestSSHConnection:
         mock_ssh_channel.recv.return_value = b"command output\n$ "
 
         # Set prompt symbol through proper connection flow
-        with patch.object(self.ssh_conn, '_flush_channel'):
+        with patch.object(self.ssh_conn, "_flush_channel"):
             self.ssh_conn.prompt_symbol = "$ "
             result = self.ssh_conn.write_command("test command")
 
@@ -172,7 +172,11 @@ class TestSSHConnection:
     def test_write_command_no_channel(self):
         """Test write_command when no channel available."""
         # Mock the is_connected method at the class level to return True
-        with patch.object(SSHConnection, 'is_connected', new_callable=lambda: property(lambda self: True)):
+        with patch.object(
+            SSHConnection,
+            "is_connected",
+            new_callable=lambda: property(lambda self: True),
+        ):
             self.ssh_conn.ssh_channel = None
             with pytest.raises(ConnectionError, match="SSH channel is not available"):
                 self.ssh_conn.write_command("test")
@@ -214,7 +218,7 @@ class TestSSHConnection:
         mock_ssh_channel.recv.return_value = b"some data"
 
         # Use patch to set prompt symbol
-        with patch.object(type(self.ssh_conn), 'prompt_symbol', "$ ", create=True):
+        with patch.object(type(self.ssh_conn), "prompt_symbol", "$ ", create=True):
             self.ssh_conn.flush_deep(retries_timeout=60)
 
         # Should have attempted flush and then timed out
@@ -227,33 +231,36 @@ class TestSSHConnection:
         with pytest.raises(Exception):  # ConnectionRefusedError or similar
             self.ssh_conn.connect(self.mock_device, self.destination_ip)
 
-    @patch('router_test_kit.connection.time.time')
+    @patch("router_test_kit.connection.time.time")
     def test_ssh_write_command_with_patterns(self, mock_time):
         """Test SSH write_command with expected patterns."""
         mock_ssh_channel = MagicMock()
         self.ssh_conn.ssh_channel = mock_ssh_channel
         self.ssh_conn.ssh_client = MagicMock()
         self.ssh_conn.prompt_symbol = "$ "
-        
+
         # Mock is_connected to return True
         mock_ssh_channel.closed = False
         transport = MagicMock()
         transport.is_active.return_value = True
         self.ssh_conn.ssh_client.get_transport.return_value = transport
-        
+
         # Mock time progression
-        mock_time.side_effect = [0, 0.1, 0.2, 0.3]  # Start, first check, data ready, done
-        
+        mock_time.side_effect = [
+            0,
+            0.1,
+            0.2,
+            0.3,
+        ]  # Start, first check, data ready, done
+
         # Mock channel behavior
         mock_ssh_channel.recv_ready.side_effect = [False, True, False]
         mock_ssh_channel.recv.return_value = b"output matching pattern$ "
-        
+
         response = self.ssh_conn.write_command(
-            "test command", 
-            expected_prompt_pattern=[r"pattern\$"],
-            timeout=5
+            "test command", expected_prompt_pattern=[r"pattern\$"], timeout=5
         )
-        
+
         assert response is not None
         assert "output matching pattern$ " in response
         mock_ssh_channel.send.assert_called_once_with(b"test command\n")
@@ -264,20 +271,20 @@ class TestSSHConnection:
         self.ssh_conn.ssh_channel = mock_ssh_channel
         self.ssh_conn.ssh_client = MagicMock()
         self.ssh_conn.prompt_symbol = "$ "
-        
+
         # Mock is_connected to return True
         mock_ssh_channel.closed = False
         transport = MagicMock()
         transport.is_active.return_value = True
         self.ssh_conn.ssh_client.get_transport.return_value = transport
-        
+
         # Mock channel to never be ready (simulate timeout)
         mock_ssh_channel.recv_ready.return_value = False
-        
-        with patch('router_test_kit.connection.time.time') as mock_time:
+
+        with patch("router_test_kit.connection.time.time") as mock_time:
             # Simulate timeout condition
             mock_time.side_effect = [0, 10, 20]  # Start, timeout exceeded
-            
+
             response = self.ssh_conn.write_command("test command", timeout=5)
             # When timeout occurs and no response_parts, it returns None
             assert response is None
@@ -285,21 +292,23 @@ class TestSSHConnection:
     def test_ssh_read_until(self):
         """Test that SSH connection read_until raises NotImplementedError."""
         # SSH connection inherits read_until but it should raise NotImplementedError
-        with pytest.raises(NotImplementedError, match="No connection object from Telnet found"):
+        with pytest.raises(
+            NotImplementedError, match="No connection object from Telnet found"
+        ):
             self.ssh_conn.read_until(b"$ ", timeout=5)
 
     def test_ssh_flush_channel_helper(self):
         """Test _flush_channel helper method."""
         mock_ssh_channel = MagicMock()
         self.ssh_conn.ssh_channel = mock_ssh_channel
-        
+
         # Mock channel to have data ready on first call, then not ready
         mock_ssh_channel.recv_ready.return_value = True
         mock_ssh_channel.recv.return_value = b"data_to_flush"
-        
+
         # Call the method - it should drain the channel once
         self.ssh_conn._flush_channel()
-        
+
         # Verify it called recv_ready and recv once
         mock_ssh_channel.recv_ready.assert_called_once()
         mock_ssh_channel.recv.assert_called_once_with(4096)
@@ -307,7 +316,7 @@ class TestSSHConnection:
 
 class TestConnectionLinuxMethods:
     """Test Linux-specific methods in Connection class."""
-    
+
     def setup_method(self):
         """Set up test fixtures."""
         self.ssh_conn = SSHConnection()
@@ -319,57 +328,57 @@ class TestConnectionLinuxMethods:
         self.linux_device.password = "testpass"
         self.ssh_conn.destination_device = self.linux_device
         self.ssh_conn.prompt_symbol = "$ "
-        
+
     def test_is_root_property_true(self):
         """Test is_root property when user is root."""
-        with patch.object(self.ssh_conn, 'write_command') as mock_write:
+        with patch.object(self.ssh_conn, "write_command") as mock_write:
             mock_write.return_value = "whoami\nroot\n$ "
-            
+
             result = self.ssh_conn.is_root
             assert result is True
             mock_write.assert_called_once_with("whoami", [rb"\$", b"#"])
-            
+
     def test_is_root_property_false(self):
         """Test is_root property when user is not root."""
-        with patch.object(self.ssh_conn, 'write_command') as mock_write:
+        with patch.object(self.ssh_conn, "write_command") as mock_write:
             mock_write.return_value = "whoami\nuser\n$ "
-            
+
             result = self.ssh_conn.is_root
             assert result is False
-            
+
     def test_get_interfaces(self):
         """Test _get_interfaces method."""
-        with patch.object(self.ssh_conn, 'write_command') as mock_write:
+        with patch.object(self.ssh_conn, "write_command") as mock_write:
             # Use \r\n line endings to match what the implementation expects
             ip_a_output = "ip a\r\n1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536\r\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500\r\n3: eth1: <BROADCAST,MULTICAST> mtu 1500"
             mock_write.return_value = ip_a_output
-            
+
             interfaces = self.ssh_conn._get_interfaces()
-            
+
             # After split and removing first element (command), should have 3 interfaces
             assert interfaces is not None
             assert len(interfaces) == 3
-            
+
     def test_get_interface_found(self):
         """Test _get_interface when interface exists."""
-        with patch.object(self.ssh_conn, '_get_interfaces') as mock_get_interfaces:
+        with patch.object(self.ssh_conn, "_get_interfaces") as mock_get_interfaces:
             mock_get_interfaces.return_value = [
                 "1: lo: <LOOPBACK,UP,LOWER_UP>",
-                "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>", 
-                "3: eth1: <BROADCAST,MULTICAST>"
+                "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>",
+                "3: eth1: <BROADCAST,MULTICAST>",
             ]
-            
+
             interface = self.ssh_conn._get_interface("eth0")
             assert interface == "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>"
-            
+
     def test_get_interface_not_found(self):
         """Test _get_interface when interface doesn't exist."""
-        with patch.object(self.ssh_conn, '_get_interfaces') as mock_get_interfaces:
+        with patch.object(self.ssh_conn, "_get_interfaces") as mock_get_interfaces:
             mock_get_interfaces.return_value = [
                 "1: lo: <LOOPBACK,UP,LOWER_UP>",
-                "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>"
+                "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>",
             ]
-            
+
             interface = self.ssh_conn._get_interface("eth2")
             assert interface is None
 
@@ -379,7 +388,7 @@ class TestTelnetConnection:
 
     def setup_method(self):
         """Set up test fixtures."""
-        with patch('warnings.warn'):  # Suppress deprecation warning during tests
+        with patch("warnings.warn"):  # Suppress deprecation warning during tests
             self.telnet_conn = TelnetConnection(timeout=5)
         self.mock_device = MagicMock(spec=Device)
         self.mock_device.username = "testuser"
@@ -390,46 +399,46 @@ class TestTelnetConnection:
 
     def test_init(self):
         """Test TelnetConnection initialization."""
-        with patch('warnings.warn') as mock_warn:
+        with patch("warnings.warn") as mock_warn:
             conn = TelnetConnection(timeout=10)
             assert conn.timeout == 10
             assert conn.resulting_telnet_connection is not None
             # Should issue deprecation warning
             mock_warn.assert_called_once()
 
-    @patch('router_test_kit.connection.telnetlib.Telnet')
+    @patch("router_test_kit.connection.telnetlib.Telnet")
     def test_connect_success(self, mock_telnet):
         """Test successful Telnet connection."""
         mock_telnet_instance = MagicMock()
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         # Mock successful authentication process
         mock_telnet_instance.expect.side_effect = [
             (0, b"Username:", b""),  # Username prompt found
             (0, b"Password:", b""),  # Password prompt found
         ]
         mock_telnet_instance.read_until.return_value = b"$ "
-        
+
         # Mock the socket to make is_connected return True
         mock_socket = MagicMock()
         mock_socket.getsockopt.return_value = 1  # Valid socket type
         mock_telnet_instance.get_socket.return_value = mock_socket
-        
+
         result = self.telnet_conn.connect(self.mock_device, self.destination_ip)
-        
+
         assert result == self.telnet_conn
         assert self.telnet_conn.destination_device == self.mock_device
         assert self.telnet_conn.destination_ip == self.destination_ip
 
-    @patch('router_test_kit.connection.telnetlib.Telnet')
+    @patch("router_test_kit.connection.telnetlib.Telnet")
     def test_connect_failure(self, mock_telnet):
         """Test Telnet connection failure."""
         mock_telnet_instance = MagicMock()
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         # Mock connection failure
         mock_telnet_instance.open.side_effect = Exception("Connection failed")
-        
+
         with pytest.raises(Exception):
             self.telnet_conn.connect(self.mock_device, self.destination_ip)
 
@@ -439,56 +448,56 @@ class TestTelnetConnection:
         mock_socket = MagicMock()
         mock_telnet_instance.get_socket.return_value = mock_socket
         mock_socket.getsockopt.return_value = 1  # Valid socket type
-        
+
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         assert self.telnet_conn.is_connected is True
 
     def test_is_connected_false_no_connection(self):
         """Test is_connected returns False when no connection."""
         self.telnet_conn.resulting_telnet_connection = None
-        
+
         assert self.telnet_conn.is_connected is False
 
     def test_is_connected_false_socket_error(self):
         """Test is_connected returns False when socket error occurs."""
         mock_telnet_instance = MagicMock()
         mock_telnet_instance.get_socket.side_effect = Exception("Socket error")
-        
+
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         assert self.telnet_conn.is_connected is False
 
-    @patch('router_test_kit.connection.logger')
+    @patch("router_test_kit.connection.logger")
     def test_disconnect(self, mock_logger):
         """Test Telnet disconnection."""
         mock_telnet_instance = MagicMock()
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
         self.telnet_conn.destination_device = self.mock_device
         self.telnet_conn.destination_ip = self.destination_ip
-        
+
         # Mock the socket behavior to simulate disconnection after close()
         mock_socket = MagicMock()
         mock_telnet_instance.get_socket.return_value = mock_socket
-        
+
         # Track whether close() has been called
         close_called = False
-        
+
         def close_side_effect():
             nonlocal close_called
             close_called = True
-        
+
         def get_socket_side_effect():
             if close_called:
                 raise Exception("Connection closed")
             return mock_socket
-        
+
         mock_telnet_instance.close.side_effect = close_side_effect
         mock_telnet_instance.get_socket.side_effect = get_socket_side_effect
         mock_socket.getsockopt.return_value = 1  # Valid socket before close
-        
+
         self.telnet_conn.disconnect()
-        
+
         mock_telnet_instance.close.assert_called_once()
         # Should log disconnection
         mock_logger.info.assert_called_once()
@@ -499,12 +508,12 @@ class TestTelnetConnection:
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
         self.telnet_conn.destination_device = self.mock_device
         self.telnet_conn.destination_ip = self.destination_ip
-        
+
         # Mock socket to always return True (connection stays active even after close)
         mock_socket = MagicMock()
         mock_socket.getsockopt.return_value = 1  # Always returns valid socket type
         mock_telnet_instance.get_socket.return_value = mock_socket
-        
+
         with pytest.raises(ConnectionError):
             self.telnet_conn.disconnect()
 
@@ -512,33 +521,33 @@ class TestTelnetConnection:
         """Test successful credential writing."""
         mock_telnet_instance = MagicMock()
         mock_telnet_instance.expect.return_value = (0, b"login:", b"")
-        
+
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         self.telnet_conn._write_credentials([b"login:"], "testuser")
-        
+
         mock_telnet_instance.write.assert_called_once_with(b"testuser\r")
 
     def test_write_credentials_no_match(self):
         """Test credential writing when no match found."""
         mock_telnet_instance = MagicMock()
         mock_telnet_instance.expect.return_value = (-1, None, b"no match")
-        
+
         self.telnet_conn.resulting_telnet_connection = mock_telnet_instance
-        
+
         with pytest.raises(EOFError):
             self.telnet_conn._write_credentials([b"login:"], "testuser")
 
     def test_write_credentials_no_connection(self):
         """Test credential writing when no connection object."""
         self.telnet_conn.resulting_telnet_connection = None
-        
+
         # Should not raise an exception, just log an error
         self.telnet_conn._write_credentials([b"login:"], "testuser")
 
     def test_occupied_decorator(self):
         """Test the occupied decorator functionality for Telnet."""
         self.telnet_conn._is_occupied = True
-        
+
         with pytest.raises(ConnectionRefusedError):
             self.telnet_conn.connect(self.mock_device, self.destination_ip)

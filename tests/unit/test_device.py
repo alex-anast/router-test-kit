@@ -11,7 +11,7 @@ class TestHostDevice:
 
     def test_write_command_success(self):
         """Test successful command execution."""
-        with mock.patch('subprocess.run') as mock_run:
+        with mock.patch("subprocess.run") as mock_run:
             mock_result = mock.Mock()
             mock_result.returncode = 0
             mock_result.stdout = "command output"
@@ -27,12 +27,12 @@ class TestHostDevice:
                 capture_output=True,
                 text=True,
                 timeout=30,
-                check=False
+                check=False,
             )
 
     def test_write_command_with_stderr(self):
         """Test command execution that returns both stdout and stderr."""
-        with mock.patch('subprocess.run') as mock_run:
+        with mock.patch("subprocess.run") as mock_run:
             mock_result = mock.Mock()
             mock_result.returncode = 0
             mock_result.stdout = "output"
@@ -45,7 +45,7 @@ class TestHostDevice:
 
     def test_write_command_failure(self):
         """Test command execution that fails."""
-        with mock.patch('subprocess.run') as mock_run:
+        with mock.patch("subprocess.run") as mock_run:
             mock_result = mock.Mock()
             mock_result.returncode = 1
             mock_result.stdout = ""
@@ -58,7 +58,7 @@ class TestHostDevice:
 
     def test_write_command_timeout(self):
         """Test command execution that times out."""
-        with mock.patch('subprocess.run') as mock_run:
+        with mock.patch("subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.TimeoutExpired("cmd", 30)
 
             result = HostDevice.write_command("sleep 60")
@@ -67,7 +67,7 @@ class TestHostDevice:
 
     def test_write_command_os_error(self):
         """Test command execution that raises OSError."""
-        with mock.patch('subprocess.run') as mock_run:
+        with mock.patch("subprocess.run") as mock_run:
             mock_run.side_effect = OSError("Command not found")
 
             result = HostDevice.write_command("nonexistent_command")
@@ -76,8 +76,10 @@ class TestHostDevice:
 
     def test_write_command_quiet_mode(self):
         """Test command execution in quiet mode suppresses error logging."""
-        with mock.patch('subprocess.run') as mock_run, \
-             mock.patch('router_test_kit.device.logger') as mock_logger:
+        with (
+            mock.patch("subprocess.run") as mock_run,
+            mock.patch("router_test_kit.device.logger") as mock_logger,
+        ):
             mock_result = mock.Mock()
             mock_result.returncode = 1
             mock_result.stdout = ""
@@ -91,8 +93,10 @@ class TestHostDevice:
 
     def test_write_command_print_response(self):
         """Test command execution with print_response flag."""
-        with mock.patch('subprocess.run') as mock_run, \
-             mock.patch('router_test_kit.device.logger') as mock_logger:
+        with (
+            mock.patch("subprocess.run") as mock_run,
+            mock.patch("router_test_kit.device.logger") as mock_logger,
+        ):
             mock_result = mock.Mock()
             mock_result.returncode = 0
             mock_result.stdout = "success"
@@ -160,6 +164,6 @@ class TestOneOS6Device:
 
     def test_physical_interfaces_list(self):
         """Test OneOS6Device has required physical interfaces list."""
-        assert hasattr(OneOS6Device, 'PHYSICAL_INTERFACES_LIST')
+        assert hasattr(OneOS6Device, "PHYSICAL_INTERFACES_LIST")
         assert "gigabitethernet" in OneOS6Device.PHYSICAL_INTERFACES_LIST
         assert "fastethernet" in OneOS6Device.PHYSICAL_INTERFACES_LIST
