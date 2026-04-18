@@ -25,11 +25,18 @@ from router_test_kit.device import LinuxDevice
 from router_test_kit.connection import SSHConnection
 
 device = LinuxDevice(username="admin", password="secret")
+conn = SSHConnection(timeout=10).connect(device, "192.168.1.100")
+try:
+    output = conn.write_command("ip route show")
+    print(output)
+finally:
+    conn.disconnect()
+```
 
-with SSHConnection() as conn:
-    conn.connect(device, "192.168.1.100")
-    result = conn.exec("ip route show")
-    print(result)
+`SSHConnection.connect` accepts an optional `port` (default `22`), so non-standard SSH ports work without any subclassing:
+
+```python
+conn = SSHConnection().connect(device, "192.168.1.100", port=2222)
 ```
 
 ## Supported devices

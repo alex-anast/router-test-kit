@@ -17,13 +17,13 @@ Quick Start:
     from router_test_kit.device import LinuxDevice
     from router_test_kit.connection import SSHConnection
 
-    # Create device and establish connection
     device = LinuxDevice(username="admin", password="secure_pass")
-
-    with SSHConnection() as conn:
-        conn.connect(device, "192.168.1.100")
-        result = conn.exec("ip route show")
+    conn = SSHConnection(timeout=10).connect(device, "192.168.1.100")
+    try:
+        result = conn.write_command("ip route show")
         print(f"Routes: {result}")
+    finally:
+        conn.disconnect()
     ```
 
 Plugin System:

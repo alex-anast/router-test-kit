@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python compatibility is now capped at `<3.13` while `telnetlib` is the Telnet backend.
 - Legacy IPSec example (`examples/advanced_ipsec_test/test_ipsec.py`) now imports from the installed `router_test_kit` package instead of the removed `src.*` layout and the `sys.path.insert` hack.
 - Python version badge in README replaced with a static `3.9 – 3.12` badge reflecting `requires-python`.
+- `docs/usage.md` rewritten to match the current SSH-first API, document the optional `port` parameter, and cross-link the testing tiers.
+- README and package docstring Quick Start snippets replaced: both showed a non-existent `with SSHConnection() as conn: … conn.exec(...)` API; now use the actual `connect().write_command()` flow.
+- `ruff` / `mypy` lower bounds in `[dev]` extras tightened to `>=0.9.0` / `>=1.14.1` to match the pre-commit pins.
 
 ### Deprecated
 - `TelnetConnection` and `TelnetCLIConnection` emit a `DeprecationWarning` on instantiation. Migrate to `SSHConnection` for future compatibility.
