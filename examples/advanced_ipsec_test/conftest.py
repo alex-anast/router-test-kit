@@ -25,7 +25,7 @@ SKIPPED = "[ SKIP ] "
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 IPSEC_CFG_DIR_NAME = "configs_ipsec"
 IPSEC_JSON_NAME = "ipsec.json"
-BSA_DIR = "bsa"           # sub-directory inside configs_ipsec for BSA configs
+BSA_DIR = "bsa"  # sub-directory inside configs_ipsec for BSA configs
 SHOW_CRYPTO_DIR = "show_crypto"  # sub-directory for show-crypto reference data
 RADIUS_CFG_DIR_NAME = "configs_radius"
 

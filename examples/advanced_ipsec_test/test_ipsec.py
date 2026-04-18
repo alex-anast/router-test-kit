@@ -958,9 +958,7 @@ def setup_interfaces(password: str) -> list[dict[str, str]]:
     for _, interface in json_config["HOST"]["interfaces"].items():
         ip = interface.get("ip", "")
         if ip:
-            static_utils.set_interface_ip(
-                interface["name"], interface["ip"], password
-            )
+            static_utils.set_interface_ip(interface["name"], interface["ip"], password)
             logger.info(f"IP {interface['ip']} added to interface {interface['name']}")
             interface_info.append({"name": interface["name"], "ip": interface["ip"]})
 
