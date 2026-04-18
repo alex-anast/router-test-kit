@@ -33,7 +33,7 @@ from typing import Optional
 import pytest
 
 # Add the root directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 import src.static_utils
 from conftest import (  # Colouring  # Paths and file names  # Info from JSON
     BSA_DIR,
@@ -63,7 +63,9 @@ logger = logging.getLogger(__name__)
 @pytest.mark.generic
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_GENERIC)
-def test_ipsec_generic(setup_marker: str, description: str, keywords: list[str], sudo_password) -> None:
+def test_ipsec_generic(
+    setup_marker: str, description: str, keywords: list[str], sudo_password
+) -> None:
     src.static_utils.print_banner(f"GENERIC - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_generic.__name__, setup_marker)
     local_radius_connection_used = None
@@ -78,8 +80,12 @@ def test_ipsec_generic(setup_marker: str, description: str, keywords: list[str],
     try:
         logger.debug("Start performing checks ...")
 
-        showCryptoIpsecSA_referenceData_VM_A = get_reference_data(setup_info, "VM_A", "show_crypto_ipsec_sa")
-        showCryptoIpsecSA_referenceData_VM_B = get_reference_data(setup_info, "VM_B", "show_crypto_ipsec_sa")
+        showCryptoIpsecSA_referenceData_VM_A = get_reference_data(
+            setup_info, "VM_A", "show_crypto_ipsec_sa"
+        )
+        showCryptoIpsecSA_referenceData_VM_B = get_reference_data(
+            setup_info, "VM_B", "show_crypto_ipsec_sa"
+        )
 
         assert_nbr_active_sa(
             (connection_vm_a, showCryptoIpsecSA_referenceData_VM_A),
@@ -87,22 +93,45 @@ def test_ipsec_generic(setup_marker: str, description: str, keywords: list[str],
         )
 
         assert_show_crypto_ipsec_sa(
-            connection_vm_a, showCryptoIpsecSA_referenceData_VM_A,
-            data_remove_lines_containing = {"spi", "sec)", "#", "protected vrf: default", "protected vrf: (none)"},
-            expected_data_remove_lines_containing = {"spi", "sec)", "#"},
+            connection_vm_a,
+            showCryptoIpsecSA_referenceData_VM_A,
+            data_remove_lines_containing={
+                "spi",
+                "sec)",
+                "#",
+                "protected vrf: default",
+                "protected vrf: (none)",
+            },
+            expected_data_remove_lines_containing={"spi", "sec)", "#"},
         )
         assert_show_crypto_ipsec_sa(
-            connection_vm_b, showCryptoIpsecSA_referenceData_VM_B,
-            data_remove_lines_containing = {"spi", "sec)", "#", "protected vrf: default", "protected vrf: (none)"},
-           expected_data_remove_lines_containing = {"spi", "sec)", "#"},
+            connection_vm_b,
+            showCryptoIpsecSA_referenceData_VM_B,
+            data_remove_lines_containing={
+                "spi",
+                "sec)",
+                "#",
+                "protected vrf: default",
+                "protected vrf: (none)",
+            },
+            expected_data_remove_lines_containing={"spi", "sec)", "#"},
         )
 
-        assert_show_crypto_acl(connection_vm_a, get_reference_data(setup_info, "VM_A", "show_crypto_acl"))
-        assert_show_crypto_acl(connection_vm_b, get_reference_data(setup_info, "VM_B", "show_crypto_acl"))
+        assert_show_crypto_acl(
+            connection_vm_a, get_reference_data(setup_info, "VM_A", "show_crypto_acl")
+        )
+        assert_show_crypto_acl(
+            connection_vm_b, get_reference_data(setup_info, "VM_B", "show_crypto_acl")
+        )
 
-        assert_data_test(*get_script_data(setup_info), setup_info, connection_vm_a, connection_vm_b)
+        assert_data_test(
+            *get_script_data(setup_info), setup_info, connection_vm_a, connection_vm_b
+        )
 
-        assert_show_policy_interface(connection_vm_a, get_reference_data(setup_info, "VM_A", "show_policy_interface"))
+        assert_show_policy_interface(
+            connection_vm_a,
+            get_reference_data(setup_info, "VM_A", "show_policy_interface"),
+        )
 
         assert_show_commands_dont_fail(connection_vm_a)
         assert_show_commands_dont_fail(connection_vm_b)
@@ -120,7 +149,9 @@ def test_ipsec_generic(setup_marker: str, description: str, keywords: list[str],
 @pytest.mark.algorithms
 @pytest.mark.flaky(reruns=2)
 @pytest.mark.parametrize("setup_marker, description, keywords", TEST_SETUPS_ALGORITHMS)
-def test_ipsec_algorithms(setup_marker: str, description: str, keywords: list[str], sudo_password) -> None:
+def test_ipsec_algorithms(
+    setup_marker: str, description: str, keywords: list[str], sudo_password
+) -> None:
     src.static_utils.print_banner(f"ALGORITHMS - {setup_marker.upper()}", description)
     setup_info = (test_ipsec_algorithms.__name__, setup_marker)
 
@@ -130,8 +161,12 @@ def test_ipsec_algorithms(setup_marker: str, description: str, keywords: list[st
     try:
         logger.debug("Start performing checks ...")
 
-        showCryptoIpsecSA_referenceData_VM_A = get_reference_data(setup_info, "VM_A", "show_crypto_ipsec_sa")
-        showCryptoIpsecSA_referenceData_VM_B = get_reference_data(setup_info, "VM_B", "show_crypto_ipsec_sa")
+        showCryptoIpsecSA_referenceData_VM_A = get_reference_data(
+            setup_info, "VM_A", "show_crypto_ipsec_sa"
+        )
+        showCryptoIpsecSA_referenceData_VM_B = get_reference_data(
+            setup_info, "VM_B", "show_crypto_ipsec_sa"
+        )
 
         assert_nbr_active_sa(
             (connection_vm_a, showCryptoIpsecSA_referenceData_VM_A),
@@ -140,11 +175,11 @@ def test_ipsec_algorithms(setup_marker: str, description: str, keywords: list[st
 
         assert_algorithms(
             connection_vm_a,
-            get_reference_data(setup_info, "VM_A", "show_crypto_ikev2_sa_detailed")
+            get_reference_data(setup_info, "VM_A", "show_crypto_ikev2_sa_detailed"),
         )
         assert_algorithms(
             connection_vm_b,
-            get_reference_data(setup_info, "VM_B", "show_crypto_ikev2_sa_detailed")
+            get_reference_data(setup_info, "VM_B", "show_crypto_ikev2_sa_detailed"),
         )
 
         logger.info(f"{GREEN}{OK}{description} - TEST PASSED{NC}")
@@ -169,13 +204,17 @@ def check_radius_connection(radius_preference: str) -> None:
             logger.error(f"{RED}{NOK}RADIUS IP is not valid{NC}")
         else:
             logger.error(f"{RED}{NOK}Unknown error while checking RADIUS Server{NC}")
-        logger.warning(f"{YELLOW}{SKIPPED}Test fails because of RADIUS, not IPSEC{NC}")  # ?
+        logger.warning(
+            f"{YELLOW}{SKIPPED}Test fails because of RADIUS, not IPSEC{NC}"
+        )  # ?
         pytest.skip("RADIUS test is skipped")
 
 
 def _get_radius_connection_ok(radius_preference: str) -> str:
     if radius_preference not in ["local", "remote"]:
-        logger.critical(f"{RED}{NOK}Invalid radius_preference, expected 'local' or 'remote' but got {radius_preference} instead. Check JSON file{NC}")
+        logger.critical(
+            f"{RED}{NOK}Invalid radius_preference, expected 'local' or 'remote' but got {radius_preference} instead. Check JSON file{NC}"
+        )
         raise ValueError
     status = _check_radius_settings_in_json(radius_preference)
     if status != "OK":
@@ -186,7 +225,9 @@ def _get_radius_connection_ok(radius_preference: str) -> str:
         logger.critical(f"{RED}RADIUS IP: {radius_ip}{NC}")
         return "RADIUS_IP_NOT_VALID"
 
-    ping_packet_loss = src.static_utils.get_packet_loss(src.static_utils.ping(radius_ip, count=2))
+    ping_packet_loss = src.static_utils.get_packet_loss(
+        src.static_utils.ping(radius_ip, count=2)
+    )
     if ping_packet_loss == "100" or ping_packet_loss is None or ping_packet_loss == "":
         return "RADIUS_NOT_RESPONDING"
     return "OK"
@@ -212,7 +253,9 @@ def assert_algorithms(connection: "TelnetConnectionIPSEC", ref_data: str) -> Non
     assert_dpd(connection, ref_data)
 
 
-def assert_config_is_matching(connection: "TelnetConnectionIPSEC", encr_info: dict[str, str]) -> None:
+def assert_config_is_matching(
+    connection: "TelnetConnectionIPSEC", encr_info: dict[str, str]
+) -> None:
     """
     Checks the current configuration of the connection and compares it with the expected encryption information.
 
@@ -228,47 +271,68 @@ def assert_config_is_matching(connection: "TelnetConnectionIPSEC", encr_info: di
         # Calls "show running-config" (5s overhead)
         crypto_ikev2_proposal_name = assert_current_config(connection, encr_info)
     except AssertionError:
-        logger.error(f"{RED}{NOK}Current config is not as expected - {connection.destination_device.hostname}{NC}")
+        logger.error(
+            f"{RED}{NOK}Current config is not as expected - {connection.destination_device.hostname}{NC}"
+        )
     # Check encryption, integrity and group completions
     for key, value in encr_info.items():
         try:
             assert_completion(connection, key, value, crypto_ikev2_proposal_name)
         except AssertionError as err:
-            logger.error(f"{RED}{NOK}Completion of '{key} ?' is wrong - {connection.destination_device.hostname}{NC}")
+            logger.error(
+                f"{RED}{NOK}Completion of '{key} ?' is wrong - {connection.destination_device.hostname}{NC}"
+            )
             raise err
-    logger.info(f"{GREEN}{OK}Config is matching - {connection.destination_device.hostname}{NC}")
+    logger.info(
+        f"{GREEN}{OK}Config is matching - {connection.destination_device.hostname}{NC}"
+    )
 
 
 def assert_current_config(connection: "TelnetConnectionIPSEC", encr_info: str) -> str:
     current_config = connection.write_command("show running-config")
-    subconfig_split, crypto_ikev2_proposal_name = _get_crypto_ikev2_proposal_subconfig(current_config)
+    subconfig_split, crypto_ikev2_proposal_name = _get_crypto_ikev2_proposal_subconfig(
+        current_config
+    )
     # Check if the config matches the reference data
     count_checked = 0
     for line in subconfig_split:
         if "encryption" in line:
-            assert encr_info["encryption"] in line, f'Expected "{encr_info["encryption"]}" in line "{line}"'
+            assert encr_info["encryption"] in line, (
+                f'Expected "{encr_info["encryption"]}" in line "{line}"'
+            )
             count_checked += 1
             continue
         if "integrity" in line:
-            assert encr_info["integrity"] in line, f'Expected "{encr_info["integrity"]}" in line "{line}"'
+            assert encr_info["integrity"] in line, (
+                f'Expected "{encr_info["integrity"]}" in line "{line}"'
+            )
             count_checked += 1
             continue
         if "group" in line:
-            assert encr_info["group"] in line, f'Expected "{encr_info["group"]}" in line "{line}"'
+            assert encr_info["group"] in line, (
+                f'Expected "{encr_info["group"]}" in line "{line}"'
+            )
             count_checked += 1
             continue
     if count_checked != 3:
-        raise AssertionError("Did not perform exactly 3 checks, for encryption, integrity and group. Check the config:\n" + '\n'.join(subconfig_split))
+        raise AssertionError(
+            "Did not perform exactly 3 checks, for encryption, integrity and group. Check the config:\n"
+            + "\n".join(subconfig_split)
+        )
     return crypto_ikev2_proposal_name
 
 
-def assert_completion(connection: "TelnetConnectionIPSEC", key: str, value: str, name: str) -> None:
+def assert_completion(
+    connection: "TelnetConnectionIPSEC", key: str, value: str, name: str
+) -> None:
     response = _get_crypto_ikev2_proposal_help(connection, name, key)
     if response is None:
         raise AssertionError(f'"{key} ?" did not return a proper response: {response}')
-    response_split = response.split('\n')
+    response_split = response.split("\n")
     if len(response_split) < 3:
-        raise AssertionError(f'"{key} ?" did not return a proper response: {response_split}')
+        raise AssertionError(
+            f'"{key} ?" did not return a proper response: {response_split}'
+        )
     response_split = response_split[3:-1]  # Discard header and footer
 
     found_value = False
@@ -276,10 +340,18 @@ def assert_completion(connection: "TelnetConnectionIPSEC", key: str, value: str,
         if value in line:
             found_value = True
             break
-    assert found_value, f'"{value}" not found in the list of possible completions:' + '\n'.join(response_split)
+    assert found_value, (
+        f'"{value}" not found in the list of possible completions:'
+        + "\n".join(response_split)
+    )
 
 
-def assert_dpd(connection: "TelnetConnectionIPSEC", ref_data: str, checks_iterations: int=3, checks_sleep: int=10) -> None:
+def assert_dpd(
+    connection: "TelnetConnectionIPSEC",
+    ref_data: str,
+    checks_iterations: int = 3,
+    checks_sleep: int = 10,
+) -> None:
     """
     Checks the DPD configuration and the increment of local and remote message IDs over a number of iterations.
     A DPD request is sent every 10 seconds, so the message IDs should increment at least once every 10 seconds.
@@ -299,48 +371,85 @@ def assert_dpd(connection: "TelnetConnectionIPSEC", ref_data: str, checks_iterat
     dpd_pattern = re.compile(r"DPD configured (.*)")
     dpd_configuration = re.search(dpd_pattern, response).group(1).strip()
     dpd_configuration_expected = re.search(dpd_pattern, ref_data).group(1).strip()
-    assert dpd_configuration == dpd_configuration_expected, \
+    assert dpd_configuration == dpd_configuration_expected, (
         f"Expected {dpd_configuration_expected}, but got {dpd_configuration} instead"
+    )
 
-    local_req_msg_id_pattern  = re.compile(r"Local req msg id:  (\d+).*")
+    local_req_msg_id_pattern = re.compile(r"Local req msg id:  (\d+).*")
     remote_reg_msg_id_pattern = re.compile(r"Remote reg msg id:  (\d+).*")
 
-    initial_local_req_msg_id  = int(local_req_msg_id_pattern.search(response).group(1))
+    initial_local_req_msg_id = int(local_req_msg_id_pattern.search(response).group(1))
     initial_remote_reg_msg_id = int(remote_reg_msg_id_pattern.search(response).group(1))
     for _ in range(checks_iterations):
-        logger.debug("DPD Check: Iteration %s - Waiting for counters to increment...", _)
+        logger.debug(
+            "DPD Check: Iteration %s - Waiting for counters to increment...", _
+        )
         sleep(checks_sleep)
         response = connection.write_command("show crypto ikev2 sa detailed")
-        local_req_msg_id  = int(local_req_msg_id_pattern.search(response).group(1))
+        local_req_msg_id = int(local_req_msg_id_pattern.search(response).group(1))
         remote_reg_msg_id = int(remote_reg_msg_id_pattern.search(response).group(1))
-        if local_req_msg_id > initial_local_req_msg_id and remote_reg_msg_id > initial_remote_reg_msg_id:
-            logger.debug("DPD Check: SUCCESS - Both counters incremented after %ss", checks_sleep)
-            logger.debug("DPD Check: Initial Counters - Local: %s,\tRemote: %s", initial_local_req_msg_id, initial_remote_reg_msg_id)
-            logger.debug("DPD Check:   Final Counters - Local: %s,\tRemote: %s", local_req_msg_id, remote_reg_msg_id)
+        if (
+            local_req_msg_id > initial_local_req_msg_id
+            and remote_reg_msg_id > initial_remote_reg_msg_id
+        ):
+            logger.debug(
+                "DPD Check: SUCCESS - Both counters incremented after %ss", checks_sleep
+            )
+            logger.debug(
+                "DPD Check: Initial Counters - Local: %s,\tRemote: %s",
+                initial_local_req_msg_id,
+                initial_remote_reg_msg_id,
+            )
+            logger.debug(
+                "DPD Check:   Final Counters - Local: %s,\tRemote: %s",
+                local_req_msg_id,
+                remote_reg_msg_id,
+            )
             initial_local_req_msg_id = local_req_msg_id
             initial_remote_reg_msg_id = remote_reg_msg_id
         else:
-            logger.error("DPD Check: Failure - Counters did not increment after %ss on device %s", checks_sleep, connection.destination_device.hostname)
-    logger.info(f"{GREEN}{OK}DPD: Counters incremented after {checks_iterations} checks - {connection.destination_device.hostname}{NC}")
+            logger.error(
+                "DPD Check: Failure - Counters did not increment after %ss on device %s",
+                checks_sleep,
+                connection.destination_device.hostname,
+            )
+    logger.info(
+        f"{GREEN}{OK}DPD: Counters incremented after {checks_iterations} checks - {connection.destination_device.hostname}{NC}"
+    )
 
 
-def assert_show_policy_interface(connection: "TelnetConnectionIPSEC", expected_data: Optional[str] = None) -> None:
+def assert_show_policy_interface(
+    connection: "TelnetConnectionIPSEC", expected_data: Optional[str] = None
+) -> None:
     if expected_data is None:
-        logger.info(f"{YELLOW}{SKIPPED}show policy-interface for device {connection.destination_device.hostname}{NC}")
+        logger.info(
+            f"{YELLOW}{SKIPPED}show policy-interface for device {connection.destination_device.hostname}{NC}"
+        )
         return
     data = connection.parse_show_policy_interface()
     reference_data = clean_lines(expected_data, from_id=1)
     _check_diff_in_files(
-        data, reference_data, test_type="show policy interface",
-        device_name=connection.destination_device.hostname
+        data,
+        reference_data,
+        test_type="show policy interface",
+        device_name=connection.destination_device.hostname,
     )
-    logger.info(f"{GREEN}{OK}show policy-interface - {connection.destination_device.hostname}{NC}")
+    logger.info(
+        f"{GREEN}{OK}show policy-interface - {connection.destination_device.hostname}{NC}"
+    )
 
 
-def assert_data_test(nbr_packets_expected: int, test_commands: list[str], setup_info: tuple[str, str], *connections: "TelnetConnectionIPSEC") -> None:
+def assert_data_test(
+    nbr_packets_expected: int,
+    test_commands: list[str],
+    setup_info: tuple[str, str],
+    *connections: "TelnetConnectionIPSEC",
+) -> None:
     if nbr_packets_expected is None and test_commands is None:
         for connection in connections:
-            logger.info(f"{YELLOW}{SKIPPED}Data Test for device {connection.destination_device.hostname}{NC}")
+            logger.info(
+                f"{YELLOW}{SKIPPED}Data Test for device {connection.destination_device.hostname}{NC}"
+            )
         return
 
     logger.info("Starting Data Test...")
@@ -361,71 +470,151 @@ def assert_data_test(nbr_packets_expected: int, test_commands: list[str], setup_
     reference_data = {}
     for i, _connection in enumerate(connections, start=1):
         vm_name = f"VM_{chr(64 + i)}"  # This will generate VM_A, VM_B, VM_C, etc.
-        reference_data[vm_name] = get_reference_data(setup_info, vm_name, "show_crypto_ipsec_sa_data")
+        reference_data[vm_name] = get_reference_data(
+            setup_info, vm_name, "show_crypto_ipsec_sa_data"
+        )
 
-    remove_lines_containing = {"spi", "sec)", "protected vrf: default", "protected vrf: (none)"}
+    remove_lines_containing = {
+        "spi",
+        "sec)",
+        "protected vrf: default",
+        "protected vrf: (none)",
+    }
     for i, connection in enumerate(connections, start=1):
         vm_name = f"VM_{chr(64 + i)}"  # This will generate VM_A, VM_B, VM_C, etc.
-        assert_show_crypto_ipsec_sa(connection, reference_data[vm_name], remove_lines_containing)
+        assert_show_crypto_ipsec_sa(
+            connection, reference_data[vm_name], remove_lines_containing
+        )
     logger.info(f"{GREEN}{OK}Data Test{NC}")
 
 
 def assert_show_commands_dont_fail(connection: "TelnetConnectionIPSEC") -> None:
-    assert connection.write_command("show crypto call admission"),            f'{RED}command "show crypto call admission" did not return anything{NC}'
-    assert connection.write_command("show crypto call admission statistics"), f'{RED}command "show crypto call admission statistics" did not return anything{NC}'
-    assert connection.write_command("show crypto ikev2 sa"),                  f'{RED}command "show crypto ikev2 sa" did not return anything{NC}'
-    assert connection.write_command("show crypto ikev2 sa detailed"),         f'{RED}command "show crypto ikev2 sa detailed" did not return anything{NC}'
-    assert connection.write_command("show crypto ikev2 session"),             f'{RED}command "show crypto ikev2 session" did not return anything{NC}'
-    assert connection.write_command("show crypto ikev2 session detailed"),    f'{RED}command "show crypto ikev2 session detailed" did not return anything{NC}'
-    assert connection.write_command("show crypto ikev2 stats"),               f'{RED}command "show crypto ikev2 stats" did not return anything{NC}'
-    assert connection.write_command("show crypto ipsec client ezvpn"),        f'{RED}command "show crypto ipsec client ezvpn" did not return anything{NC}'
-    assert connection.write_command("show crypto ipsec sa"),                  f'{RED}command "show crypto ipsec sa" did not return anything{NC}'
-    assert connection.write_command("show crypto ipsec sa detail"),           f'{RED}command "show crypto ipsec sa detail" did not return anything{NC}'
-    assert connection.write_command("show crypto ipsec sa identity"),         f'{RED}command "show crypto ipsec sa identity" did not return anything{NC}'
-    assert connection.write_command("show crypto ipsec sa identity detail"),  f'{RED}command "show crypto ipsec sa identity detail" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp key"),                f'{RED}command "show crypto isakmp key" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp policy"),             f'{RED}command "show crypto isakmp policy" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp profile"),            f'{RED}command "show crypto isakmp profile" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp sa"),                 f'{RED}command "show crypto isakmp sa" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp sa count"),           f'{RED}command "show crypto isakmp sa count" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp sa detail"),          f'{RED}command "show crypto isakmp sa detail" did not return anything{NC}'
-    assert connection.write_command("show crypto isakmp statistics"),         f'{RED}command "show crypto isakmp statistics" did not return anything{NC}'
-    assert connection.write_command("show expert crypto config"),             f'{RED}command "show crypto config" did not return anything{NC}'
-    assert connection.write_command("show expert crypto dns"),                f'{RED}command "show crypto dns" did not return anything{NC}'
-    assert connection.write_command("show expert crypto cmid"),               f'{RED}command "show crypto cmid" did not return anything{NC}'
-    assert connection.write_command("show crypto session"),                   f'{RED}command "show crypto session" did not return anything{NC}'
-    assert connection.write_command("show crypto session detail"),            f'{RED}command "show crypto session detail" did not return anything{NC}'
-    assert connection.write_command("show crypto gkm group"),                 f'{RED}command "show crypto gkm group" did not return anything{NC}'
-    assert connection.write_command("show crypto gkm group name g-poc"),      f'{RED}command "show crypto gkm group name g-poc" did not return anything{NC}'
-    logger.info(f"{GREEN}{OK}All other show commands returned data - {connection.destination_device.hostname}{NC}")
+    assert connection.write_command("show crypto call admission"), (
+        f'{RED}command "show crypto call admission" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto call admission statistics"), (
+        f'{RED}command "show crypto call admission statistics" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ikev2 sa"), (
+        f'{RED}command "show crypto ikev2 sa" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ikev2 sa detailed"), (
+        f'{RED}command "show crypto ikev2 sa detailed" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ikev2 session"), (
+        f'{RED}command "show crypto ikev2 session" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ikev2 session detailed"), (
+        f'{RED}command "show crypto ikev2 session detailed" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ikev2 stats"), (
+        f'{RED}command "show crypto ikev2 stats" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ipsec client ezvpn"), (
+        f'{RED}command "show crypto ipsec client ezvpn" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ipsec sa"), (
+        f'{RED}command "show crypto ipsec sa" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ipsec sa detail"), (
+        f'{RED}command "show crypto ipsec sa detail" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ipsec sa identity"), (
+        f'{RED}command "show crypto ipsec sa identity" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto ipsec sa identity detail"), (
+        f'{RED}command "show crypto ipsec sa identity detail" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp key"), (
+        f'{RED}command "show crypto isakmp key" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp policy"), (
+        f'{RED}command "show crypto isakmp policy" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp profile"), (
+        f'{RED}command "show crypto isakmp profile" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp sa"), (
+        f'{RED}command "show crypto isakmp sa" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp sa count"), (
+        f'{RED}command "show crypto isakmp sa count" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp sa detail"), (
+        f'{RED}command "show crypto isakmp sa detail" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto isakmp statistics"), (
+        f'{RED}command "show crypto isakmp statistics" did not return anything{NC}'
+    )
+    assert connection.write_command("show expert crypto config"), (
+        f'{RED}command "show crypto config" did not return anything{NC}'
+    )
+    assert connection.write_command("show expert crypto dns"), (
+        f'{RED}command "show crypto dns" did not return anything{NC}'
+    )
+    assert connection.write_command("show expert crypto cmid"), (
+        f'{RED}command "show crypto cmid" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto session"), (
+        f'{RED}command "show crypto session" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto session detail"), (
+        f'{RED}command "show crypto session detail" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto gkm group"), (
+        f'{RED}command "show crypto gkm group" did not return anything{NC}'
+    )
+    assert connection.write_command("show crypto gkm group name g-poc"), (
+        f'{RED}command "show crypto gkm group name g-poc" did not return anything{NC}'
+    )
+    logger.info(
+        f"{GREEN}{OK}All other show commands returned data - {connection.destination_device.hostname}{NC}"
+    )
 
 
 def assert_nbr_packets(nbr_packets: int, nbr_packets_expected: int) -> None:
     # Probably first arg will arrive as string. Don't allow implicit conversion
-    assert nbr_packets == nbr_packets_expected or nbr_packets == nbr_packets_expected - 1, \
-        f"Expected {nbr_packets_expected} packets, but got {nbr_packets} instead"
+    assert (
+        nbr_packets == nbr_packets_expected or nbr_packets == nbr_packets_expected - 1
+    ), f"Expected {nbr_packets_expected} packets, but got {nbr_packets} instead"
 
 
-def assert_show_crypto_acl(connection: "TelnetConnectionIPSEC", expected_data: Optional[str] = None) -> None:
+def assert_show_crypto_acl(
+    connection: "TelnetConnectionIPSEC", expected_data: Optional[str] = None
+) -> None:
     if expected_data is None:
-        logger.info(f"{YELLOW}{SKIPPED}show crypto acl for device {connection.destination_device.hostname}{NC}")
+        logger.info(
+            f"{YELLOW}{SKIPPED}show crypto acl for device {connection.destination_device.hostname}{NC}"
+        )
         return
     data = connection.parse_show_crypto_acl()
     reference_data = clean_lines(expected_data, from_id=2, to_id=-1)
-    _check_diff_in_files(data, reference_data, test_type="show crypto acl",
-                         device_name=connection.destination_device.hostname)
-    logger.info(f"{GREEN}{OK}show crypto acl - {connection.destination_device.hostname}{NC}")
+    _check_diff_in_files(
+        data,
+        reference_data,
+        test_type="show crypto acl",
+        device_name=connection.destination_device.hostname,
+    )
+    logger.info(
+        f"{GREEN}{OK}show crypto acl - {connection.destination_device.hostname}{NC}"
+    )
 
 
-def assert_nbr_active_sa(*info: tuple["TelnetConnectionIPSEC", str], timeout: int = 10) -> None:
+def assert_nbr_active_sa(
+    *info: tuple["TelnetConnectionIPSEC", str], timeout: int = 10
+) -> None:
     # Parse pairs
     connection_data = {}
     for connection, reference_data in info:
         if not connection.is_connected:
-            raise ConnectionError(f"Connection to {connection.destination_device.hostname} is not established")
+            raise ConnectionError(
+                f"Connection to {connection.destination_device.hostname} is not established"
+            )
         expected_nbr = get_nbr_active_sessions_from_reference_file(reference_data)
         if expected_nbr == 0:
-            logger.info(f"{YELLOW}{SKIPPED}no SA expected to be ACTIVE for device {connection.destination_device.hostname}{NC}")
+            logger.info(
+                f"{YELLOW}{SKIPPED}no SA expected to be ACTIVE for device {connection.destination_device.hostname}{NC}"
+            )
             continue
         # List items will be used in the same order as they are passed
         connection_data[connection] = expected_nbr
@@ -452,7 +641,9 @@ def assert_nbr_active_sa(*info: tuple["TelnetConnectionIPSEC", str], timeout: in
         if nbr_iterations == 5:
             for connection, _ in connection_data.items():
                 connection.clear_crypto_sa()
-        logger.info(f"Waiting for tunnel to appear ACTIVE ... {(nbr_iterations-1)*10}s/{initial_timeout*10}s")
+        logger.info(
+            f"Waiting for tunnel to appear ACTIVE ... {(nbr_iterations - 1) * 10}s/{initial_timeout * 10}s"
+        )
         nbr_iterations += 1
         timeout -= 1
         sleep(10)
@@ -466,29 +657,48 @@ def assert_show_crypto_ipsec_sa(
     data_remove_lines_containing: Optional[set] = None,
     expected_data_remove_lines_containing: Optional[set] = None,
 ) -> None:
-    data = connection.parse_show_crypto_ipsec_sa(remove_lines_containing=data_remove_lines_containing)
-    reference_data = _parse_expected_data(expected_data, expected_data_remove_lines_containing)
-    _check_diff_in_files(data, reference_data, test_type="show crypto ipsec sa",
-                         device_name = connection.destination_device.hostname)
-    logger.info(f"{GREEN}{OK}show crypto ipsec sa - {connection.destination_device.hostname}{NC}")
+    data = connection.parse_show_crypto_ipsec_sa(
+        remove_lines_containing=data_remove_lines_containing
+    )
+    reference_data = _parse_expected_data(
+        expected_data, expected_data_remove_lines_containing
+    )
+    _check_diff_in_files(
+        data,
+        reference_data,
+        test_type="show crypto ipsec sa",
+        device_name=connection.destination_device.hostname,
+    )
+    logger.info(
+        f"{GREEN}{OK}show crypto ipsec sa - {connection.destination_device.hostname}{NC}"
+    )
 
 
-def clean_lines(data: str, from_id: Optional[int]=None, to_id: Optional[int]=None) -> list[str]:
-    return [line for line in (ln.strip() for ln in data.split('\n')[from_id:to_id]) if line]
+def clean_lines(
+    data: str, from_id: Optional[int] = None, to_id: Optional[int] = None
+) -> list[str]:
+    return [
+        line for line in (ln.strip() for ln in data.split("\n")[from_id:to_id]) if line
+    ]
 
 
 def get_script_data(setup_info: tuple[str, str]) -> tuple[int, list[str]]:
     test_name, setup_marker = setup_info
     data_file = json_config[test_name][setup_marker].get("data_file")
     if data_file is not None:
-
-        data_file = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, SHOW_CRYPTO_DIR, data_file)
+        data_file = os.path.join(
+            ROOT_PATH, IPSEC_CFG_DIR_NAME, SHOW_CRYPTO_DIR, data_file
+        )
 
         with open(data_file) as f:
             data = f.read().split("\n")
-            nbr_packets_expected = int(data[1][1:])  # First character will always be a "#"
+            nbr_packets_expected = int(
+                data[1][1:]
+            )  # First character will always be a "#"
             test_commands = data[2:]
-            test_commands = [line for line in test_commands if line]  # Clear empty lines
+            test_commands = [
+                line for line in test_commands if line
+            ]  # Clear empty lines
             return nbr_packets_expected, test_commands
     return None, None
 
@@ -527,7 +737,7 @@ def cleanup_radius(connection: TelnetConnection) -> None:
 
 def get_successful_pings(commands: list[str]) -> int:
     response = src.static_utils.execute_shell_commands_on_host(commands, quiet=False)
-    return sum("bytes from" in line for line in response.split('\n'))
+    return sum("bytes from" in line for line in response.split("\n"))
 
 
 def load_json(json_config_path: Optional[str] = None) -> dict:
@@ -577,17 +787,25 @@ def cleanup_device(connection: "TelnetConnectionIPSEC", dont_disconnect=False) -
     )
     connection.clear_crypto_sa()
     answer = connection.has_open_sockets()
-    assert not answer, f"{RED}{NOK}secd udp sessions not correctly closed - {hostname}{NC}"
+    assert not answer, (
+        f"{RED}{NOK}secd udp sessions not correctly closed - {hostname}{NC}"
+    )
     connection.disconnect() if not dont_disconnect else None
 
 
-def get_reference_data(setup_info: tuple[str, str], vm_name: str, show_command: str) -> Optional[str]:
+def get_reference_data(
+    setup_info: tuple[str, str], vm_name: str, show_command: str
+) -> Optional[str]:
     test_name, setup_marker = setup_info
-    reference_file_name = json_config[test_name][setup_marker][vm_name].get(show_command)
+    reference_file_name = json_config[test_name][setup_marker][vm_name].get(
+        show_command
+    )
     if reference_file_name is None:
         return None
 
-    reference_file = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, SHOW_CRYPTO_DIR, reference_file_name)
+    reference_file = os.path.join(
+        ROOT_PATH, IPSEC_CFG_DIR_NAME, SHOW_CRYPTO_DIR, reference_file_name
+    )
     with open(reference_file) as f:
         reference_data = f.read()
     return reference_data
@@ -602,7 +820,9 @@ def get_nbr_active_sessions_from_reference_file(reference_data: str) -> Optional
     return reference_nbr_active_sa
 
 
-def ensure_clean_config_at_init(connection: "TelnetConnectionIPSEC", except_lines: Optional[str]=None) -> None:
+def ensure_clean_config_at_init(
+    connection: "TelnetConnectionIPSEC", except_lines: Optional[str] = None
+) -> None:
     """
     If used, ~5s overhead because of "show running-config"
     """
@@ -610,32 +830,48 @@ def ensure_clean_config_at_init(connection: "TelnetConnectionIPSEC", except_line
         except_lines = ["license key add", "license activate"]
 
     connection.write_command("term len 0")
-    if not connection.is_config_empty(connection.write_command("show running-config"), except_lines):
+    if not connection.is_config_empty(
+        connection.write_command("show running-config"), except_lines
+    ):
         logger.warning("Config is not empty at startup, trying to unconfigure")
         connection.flush_deep()
         cleanup_device(connection, dont_disconnect=True)
-        if not connection.is_config_empty(connection.write_command("show running-config"), except_lines):
-            raise ValueError("Config is not fully empty at startup, please manually erase config and reboot")
+        if not connection.is_config_empty(
+            connection.write_command("show running-config"), except_lines
+        ):
+            raise ValueError(
+                "Config is not fully empty at startup, please manually erase config and reboot"
+            )
         else:
             logger.info("Config successfully unconfigured")
 
 
-def check_and_activate_license(connection: "TelnetConnectionIPSEC", vm_name: str) -> None:
+def check_and_activate_license(
+    connection: "TelnetConnectionIPSEC", vm_name: str
+) -> None:
     if "license-key" in json_config[vm_name]:
         if not connection.is_license_sdwanprime_activated():
             if connection.is_license_sdwanprime_installed():
-                connection.reconfigure([
-                    "license activate sd-wan-prime",
-                ])
+                connection.reconfigure(
+                    [
+                        "license activate sd-wan-prime",
+                    ]
+                )
             else:
-                logger.critical("SD WAN license is not installed. Installing key from JSON and activating (might need reboot) ...")
-                connection.reconfigure([
-                    "license key add " + json_config[vm_name]["license-key"],
-                    "license activate sd-wan-prime",
-                ])
+                logger.critical(
+                    "SD WAN license is not installed. Installing key from JSON and activating (might need reboot) ..."
+                )
+                connection.reconfigure(
+                    [
+                        "license key add " + json_config[vm_name]["license-key"],
+                        "license activate sd-wan-prime",
+                    ]
+                )
 
 
-def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=True) -> "TelnetConnectionIPSEC":
+def setup_connection(
+    setup_info: tuple[str, str], vm_nbr: int, check_is_empty=True
+) -> "TelnetConnectionIPSEC":
     """
     check_is_empty: When developers kill the test, they leave config traces to the VMs' configs
                     With an overhead of ~5s, if this parameter is set to True, it ensures that the config is empty
@@ -646,7 +882,9 @@ def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=Tr
 
     # Skip cases where VM_C and VM_D are not expected. Assume that JSON doesn't provide config for them
     test_name, setup_marker = setup_info
-    config_for_vm_doesnt_exist = (json_config[test_name][setup_marker].get(vm_name) is None)
+    config_for_vm_doesnt_exist = (
+        json_config[test_name][setup_marker].get(vm_name) is None
+    )
     if config_for_vm_doesnt_exist:
         return None
 
@@ -656,7 +894,9 @@ def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=Tr
         connection = TelnetConnectionIPSEC().connect(vm, json_config[vm_name]["ip"])
     except socket.timeout as err:
         logger.error("Could not connect to device, caught socket.timeout.")
-        logger.warning("Make sure the devices are running and reachable (check IPs in JSON file).")
+        logger.warning(
+            "Make sure the devices are running and reachable (check IPs in JSON file)."
+        )
         raise err
 
     if check_is_empty:
@@ -666,7 +906,13 @@ def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=Tr
 
     check_and_activate_license(connection, vm_name)
 
-    connection.load_config(os.path.join(cfg_dir_path, BSA_DIR, json_config[test_name][setup_marker][vm_name]["config_file"]))
+    connection.load_config(
+        os.path.join(
+            cfg_dir_path,
+            BSA_DIR,
+            json_config[test_name][setup_marker][vm_name]["config_file"],
+        )
+    )
 
     # For Setup19: `_cont` files are patching up the initial config
     # Because of a race condition, some initial config is lost and must be repeated (trustpoints)
@@ -678,9 +924,11 @@ def setup_connection(setup_info: tuple[str, str], vm_nbr: int, check_is_empty=Tr
     return connection
 
 
-def setup_connections(setup_info: tuple[str, str]) -> tuple[
-    "TelnetConnectionIPSEC",            # VM_A
-    "TelnetConnectionIPSEC",            # VM_B
+def setup_connections(
+    setup_info: tuple[str, str],
+) -> tuple[
+    "TelnetConnectionIPSEC",  # VM_A
+    "TelnetConnectionIPSEC",  # VM_B
     Optional["TelnetConnectionIPSEC"],  # VM_C
     Optional["TelnetConnectionIPSEC"],  # VM_D, not used so far
 ]:
@@ -688,14 +936,20 @@ def setup_connections(setup_info: tuple[str, str]) -> tuple[
     connection_b = setup_connection(setup_info, vm_nbr=2)
     try:
         connection_c = setup_connection(setup_info, vm_nbr=3)
-    except OSError:  # If config for VM_C exists but VM_C is not active, test should be skipped
-        logger.error(f"{YELLOW}{SKIPPED}Found config, but could not connect to VM_C. Skipping test{NC}")
+    except (
+        OSError
+    ):  # If config for VM_C exists but VM_C is not active, test should be skipped
+        logger.error(
+            f"{YELLOW}{SKIPPED}Found config, but could not connect to VM_C. Skipping test{NC}"
+        )
         connection_c = None
         pytest.skip("Could not connect on VM_C, skipping test")
     try:
         connection_d = setup_connection(setup_info, vm_nbr=4)
     except OSError:  # If config for VM_D exists but VM_D is not active
-        logger.error(f"{YELLOW}{SKIPPED}Found config, but could not connect to VM_D. Skipping test{NC}")
+        logger.error(
+            f"{YELLOW}{SKIPPED}Found config, but could not connect to VM_D. Skipping test{NC}"
+        )
         connection_d = None
         pytest.skip("Could not connect on VM_D, skipping test")
     return connection_a, connection_b, connection_c, connection_d
@@ -706,18 +960,28 @@ def setup_interfaces(password: str) -> list[dict[str, str]]:
     for _, interface in json_config["HOST"]["interfaces"].items():
         ip = interface.get("ip", "")
         if ip:
-            src.static_utils.set_interface_ip(interface["name"], interface["ip"], password)
-            logger.info(f'IP {interface["ip"]} added to interface {interface["name"]}')
+            src.static_utils.set_interface_ip(
+                interface["name"], interface["ip"], password
+            )
+            logger.info(f"IP {interface['ip']} added to interface {interface['name']}")
             interface_info.append({"name": interface["name"], "ip": interface["ip"]})
 
         ipv6 = interface.get("ipv6", "")
         if ipv6:
-            src.static_utils.set_interface_ip(interface["name"], interface["ipv6"], password, netmask="64")
-            logger.info(f'IP {interface["ipv6"]} added to interface {interface["name"]}')
-            interface_info.append({"name": interface["name"], "ipv6": interface["ipv6"]})
+            src.static_utils.set_interface_ip(
+                interface["name"], interface["ipv6"], password, netmask="64"
+            )
+            logger.info(
+                f"IP {interface['ipv6']} added to interface {interface['name']}"
+            )
+            interface_info.append(
+                {"name": interface["name"], "ipv6": interface["ipv6"]}
+            )
 
         if not ip and not ipv6:
-            logger.warning(f"No IP or IPv6 address provided for interface {interface['name']}")
+            logger.warning(
+                f"No IP or IPv6 address provided for interface {interface['name']}"
+            )
     return interface_info
 
 
@@ -746,17 +1010,27 @@ def setup_radius(setup_info: tuple[str, str]) -> TelnetConnection:
         user = json_config["RADIUS"]["local"]["username"]
         password = json_config["RADIUS"]["local"]["password"]
         src.static_utils.scp_file_to_home_dir(
-            local_file_path  = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "authorize"),
-            user_at_ip       = user + "@" + json_config["RADIUS"]["local"]["ip"],  # i.e. user@X.X.X.X
-            password         = password,
+            local_file_path=os.path.join(
+                ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "authorize"
+            ),
+            user_at_ip=user
+            + "@"
+            + json_config["RADIUS"]["local"]["ip"],  # i.e. user@X.X.X.X
+            password=password,
         )
-        connection_to_radius.write_command(f"mv /home/{user}/authorize /etc/freeradius/3.0/mods-config/files/authorize")
+        connection_to_radius.write_command(
+            f"mv /home/{user}/authorize /etc/freeradius/3.0/mods-config/files/authorize"
+        )
         src.static_utils.scp_file_to_home_dir(
-            local_file_path  = os.path.join(ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "clients.conf"),
-            user_at_ip       = user + "@" + json_config["RADIUS"]["local"]["ip"],
-            password         = password,
+            local_file_path=os.path.join(
+                ROOT_PATH, IPSEC_CFG_DIR_NAME, RADIUS_CFG_DIR_NAME, "clients.conf"
+            ),
+            user_at_ip=user + "@" + json_config["RADIUS"]["local"]["ip"],
+            password=password,
         )
-        connection_to_radius.write_command(f"mv /home/{user}/clients.conf /etc/freeradius/3.0/clients.conf")
+        connection_to_radius.write_command(
+            f"mv /home/{user}/clients.conf /etc/freeradius/3.0/clients.conf"
+        )
 
         # Might need to restart the RADIUS server here
 
@@ -770,13 +1044,16 @@ def setup_radius(setup_info: tuple[str, str]) -> TelnetConnection:
 
 def is_radius_installed(connection: TelnetConnection) -> bool:
     response = connection.write_command("dpkg -l | grep freeradius")
-    return len(response.split('\n')[1:-1]) >= 5  # generic, common, config, utils, lib
+    return len(response.split("\n")[1:-1]) >= 5  # generic, common, config, utils, lib
 
 
 def is_radius_active(connection: TelnetConnection) -> bool:
     connected_to_internet = False
-    for _ in range (3):
-        if src.static_utils.get_packet_loss(connection.ping("8.8.8.8", nbr_packets=3)) == "0":
+    for _ in range(3):
+        if (
+            src.static_utils.get_packet_loss(connection.ping("8.8.8.8", nbr_packets=3))
+            == "0"
+        ):
             connected_to_internet = True
             break
     if not connected_to_internet:
@@ -786,13 +1063,17 @@ def is_radius_active(connection: TelnetConnection) -> bool:
     return re.search(r"freerad ", response) is not None
 
 
-def _get_crypto_ikev2_proposal_help(connection: "TelnetConnectionIPSEC", name: str, command: str) -> str:
+def _get_crypto_ikev2_proposal_help(
+    connection: "TelnetConnectionIPSEC", name: str, command: str
+) -> str:
     if name is None:
         raise ValueError("crypto ikev2 proposal <name> is not defined")
     previous_prompt_symbol = connection.prompt_symbol
-    connection.prompt_symbol = '#'  # During (re)configuring, cannot search for i.e. "VM_A#", so focus only on the symbol "#"
+    connection.prompt_symbol = "#"  # During (re)configuring, cannot search for i.e. "VM_A#", so focus only on the symbol "#"
     connection.write_command("configure terminal")
-    connection.write_command("crypto ikev2 proposal " + name)  # Name does not even have to be correct
+    connection.write_command(
+        "crypto ikev2 proposal " + name
+    )  # Name does not even have to be correct
     response = connection.write_command(f"{command} ?")
     logger.debug(f'Checking possible completiong for "{command}":')
     logger.debug(response)
@@ -816,7 +1097,7 @@ def _get_crypto_ikev2_proposal_subconfig(config: str) -> tuple[list[str], str]:
             break
     if not found:
         raise AssertionError('No "crypto ikev2 proposal" found in the config')
-    logger.debug("Subconfig collected: " + '\n'.join(lines_of_interest))
+    logger.debug("Subconfig collected: " + "\n".join(lines_of_interest))
     return lines_of_interest, crypto_ikev2_proposal_name
 
 
@@ -827,18 +1108,22 @@ def _parse_encr_info(encr_info: str) -> dict[str, str]:
     Is converted to:
         {"encryption": "aes-cbc-256", "integrity": "sha512", "group": "16"}
     """
-    encryption = re.search(r'Encr: (\w+-\w+), keysize: (\d+)', encr_info)
-    integrity = re.search(r'Hash: (\w+)', encr_info)
-    group = re.search(r'DH Grp: (\d+)', encr_info)
+    encryption = re.search(r"Encr: (\w+-\w+), keysize: (\d+)", encr_info)
+    integrity = re.search(r"Hash: (\w+)", encr_info)
+    group = re.search(r"DH Grp: (\d+)", encr_info)
 
     return {
-        'encryption': f"{encryption.group(1).lower()}-{encryption.group(2)}" if encryption else None,
-        'integrity': integrity.group(1).lower() if integrity else None,
-        'group': group.group(1) if group else None
+        "encryption": f"{encryption.group(1).lower()}-{encryption.group(2)}"
+        if encryption
+        else None,
+        "integrity": integrity.group(1).lower() if integrity else None,
+        "group": group.group(1) if group else None,
     }
 
 
-def _check_diff_in_files(data: list[str], reference_data: list[str], test_type: str, device_name: str = None) -> None:
+def _check_diff_in_files(
+    data: list[str], reference_data: list[str], test_type: str, device_name: str = None
+) -> None:
     data = _clean_data(data)
     reference_data = _clean_data(reference_data)
 
@@ -858,17 +1143,25 @@ def _check_diff_in_files(data: list[str], reference_data: list[str], test_type: 
         for line in missing_expected_data:
             logger.error(f'         Missing expected: "{line}"')
         # Will only be printed if error is raised and logging level is DEBUG (most verbose)
-        logger.debug("\n********\n" + "Retrieved data: " + '\n'.join(data))
-        logger.debug("********\n" + "Reference data: " + '\n'.join(reference_data))
+        logger.debug("\n********\n" + "Retrieved data: " + "\n".join(data))
+        logger.debug("********\n" + "Reference data: " + "\n".join(reference_data))
         raise AssertionError
 
 
-def _parse_expected_data(expected_data: str, remove_lines_containing: set[str] = None) -> list[str]:
+def _parse_expected_data(
+    expected_data: str, remove_lines_containing: set[str] = None
+) -> list[str]:
     # Strip symbols and empty lines
-    reference_data = [line.strip() for line in expected_data.split("\n") if line.strip()]
+    reference_data = [
+        line.strip() for line in expected_data.split("\n") if line.strip()
+    ]
     # Remove lines containing certain strings, if remove_lines_containing is provided
     if remove_lines_containing:
-        reference_data = [line for line in reference_data if not any(substring in line for substring in remove_lines_containing)]
+        reference_data = [
+            line
+            for line in reference_data
+            if not any(substring in line for substring in remove_lines_containing)
+        ]
     return sorted(reference_data)
 
 
@@ -894,6 +1187,7 @@ class TelnetConnectionIPSEC(TelnetConnection):
         Decorator for getting the response of a command
         If response is provided, use it, otherwise write specified command
         """
+
         def decorator(func):
             def wrapper(self, *args, **kwargs):
                 response = kwargs.pop("response", None)
@@ -901,7 +1195,9 @@ class TelnetConnectionIPSEC(TelnetConnection):
                     response = self.write_command(command)
                 kwargs["response"] = response
                 return func(self, *args, **kwargs)
+
             return wrapper
+
         return decorator
 
     @property
@@ -927,8 +1223,7 @@ class TelnetConnectionIPSEC(TelnetConnection):
         secd4_sessions = "*:500" in response
         nat_sessions = "*:4500" in response
         secd6_sessions = "[::]:500" in response
-        return (secd4_sessions or nat_sessions or secd6_sessions)
-
+        return secd4_sessions or nat_sessions or secd6_sessions
 
     @get_response("show crypto ipsec sa")
     def get_nbr_active_sa(self, response: Optional[str] = None) -> int:
@@ -940,7 +1235,11 @@ class TelnetConnectionIPSEC(TelnetConnection):
         return nbr_active_sa
 
     @get_response("show crypto ipsec sa")
-    def parse_show_crypto_ipsec_sa(self, response: Optional[str] = None, remove_lines_containing: Optional[set[str]] = None) -> list[str]:
+    def parse_show_crypto_ipsec_sa(
+        self,
+        response: Optional[str] = None,
+        remove_lines_containing: Optional[set[str]] = None,
+    ) -> list[str]:
         """
         Parses the output of `show crypto ipsec sa` and returns a list of strings.
 
@@ -965,16 +1264,25 @@ class TelnetConnectionIPSEC(TelnetConnection):
                 "protected vrf: (none)",
             }
         ip_pattern = re.compile(r"192\.168\.\d{1,3}\.\d{1,3}")
-        tunnel_pattern = re.compile(r'Virtual-IpsecTunnel \d*')
-
+        tunnel_pattern = re.compile(r"Virtual-IpsecTunnel \d*")
 
         lines = [line for line in (ln.strip() for ln in response.split("\n")) if line]
 
         # Replace occurrences of IPs and tunnel numbers
-        masked_lines = [tunnel_pattern.sub('Virtual-IpsecTunnel XX', ip_pattern.sub("192.168.XX.XX", line)) for line in lines]
+        masked_lines = [
+            tunnel_pattern.sub(
+                "Virtual-IpsecTunnel XX", ip_pattern.sub("192.168.XX.XX", line)
+            )
+            for line in lines
+        ]
 
         # Filter out lines containing certain strings or ending with certain characters
-        filtered_lines = [line for line in masked_lines if not any(item in line for item in remove_lines_containing) and not line.endswith(('#', '>'))]
+        filtered_lines = [
+            line
+            for line in masked_lines
+            if not any(item in line for item in remove_lines_containing)
+            and not line.endswith(("#", ">"))
+        ]
 
         return sorted(filtered_lines)
 
@@ -986,7 +1294,9 @@ class TelnetConnectionIPSEC(TelnetConnection):
             if self.is_tunnel_active:
                 return
             sleep(1)
-            logger.debug(f"Waiting for tunnel to appear ACTIVE ... {second}s/{timeout}s")
+            logger.debug(
+                f"Waiting for tunnel to appear ACTIVE ... {second}s/{timeout}s"
+            )
         raise TimeoutError("Timeout while waiting for tunnel to appear ACTIVE")
 
     def clear_crypto_sa(self) -> None:
@@ -998,15 +1308,19 @@ class TelnetConnectionIPSEC(TelnetConnection):
         self.write_command("clear crypto counters")
 
     @get_response("show crypto acl")
-    def parse_show_crypto_acl(self, response: Optional[str] = None) -> Optional[list[str]]:
-        if len(response.split('\n')) <= 3:
+    def parse_show_crypto_acl(
+        self, response: Optional[str] = None
+    ) -> Optional[list[str]]:
+        if len(response.split("\n")) <= 3:
             return ""
         else:
             return clean_lines(response, from_id=2, to_id=-2)
 
     @get_response("show policy-interface")
-    def parse_show_policy_interface(self, response: Optional[str] = None) -> Optional[list[str]]:
-        if len(response.split('\n')) <= 2:
+    def parse_show_policy_interface(
+        self, response: Optional[str] = None
+    ) -> Optional[list[str]]:
+        if len(response.split("\n")) <= 2:
             return ""
         else:
             return clean_lines(response, from_id=1, to_id=-1)
@@ -1016,21 +1330,25 @@ class TelnetConnectionIPSEC(TelnetConnection):
 
     @get_response("show license")
     def is_license_sdwanprime_activated(self, response: Optional[str] = None) -> bool:
-        for line in response.split('\n'):
+        for line in response.split("\n"):
             if line.strip().startswith("sd-wan-prime"):
-                installed = (line.split()[1] == "yes")
-                activated = (line.split()[2] == "true")
+                installed = line.split()[1] == "yes"
+                activated = line.split()[2] == "true"
                 if not activated and installed:
                     logger.debug("SD WAN Prime license is installed but not activated")
                 return activated
-        raise AssertionError("SD WAN Prime license not found in 'show license' output")  # Should not happen
+        raise AssertionError(
+            "SD WAN Prime license not found in 'show license' output"
+        )  # Should not happen
 
     @get_response("show license")
     def is_license_sdwanprime_installed(self, response: Optional[str] = None) -> bool:
-        for line in response.split('\n'):
+        for line in response.split("\n"):
             if line.strip().startswith("sd-wan-prime"):
-                return (line.split()[1] == "yes")
-        raise AssertionError("SD WAN Prime license not found in 'show license' output")  # Should not happen
+                return line.split()[1] == "yes"
+        raise AssertionError(
+            "SD WAN Prime license not found in 'show license' output"
+        )  # Should not happen
 
 
 if __name__ == "__main__":

@@ -40,7 +40,6 @@ Security Notice:
 """
 
 import logging
-import os
 import re
 import socket
 import time
