@@ -281,6 +281,15 @@ class Connection(ABC):
 
     @check_occupied
     def flush_deep(self, time_interval: int = 0.1, retries_timeout: int = 60) -> None:
+        """Flush the connection buffer until the prompt symbol is seen or timeout is reached.
+
+        Args:
+            time_interval: Seconds to wait between flush attempts. Defaults to 0.1.
+            retries_timeout: Total seconds to wait before giving up. 0 means no limit.
+
+        Raises:
+            TimeoutError: If the prompt is not seen within retries_timeout seconds.
+        """
         logger.debug("Deep flushing ...")
         end_pattern = f"{self.prompt_symbol}"
         if retries_timeout > 0:
@@ -295,6 +304,7 @@ class Connection(ABC):
     @property
     @abstractmethod
     def is_connected(self) -> bool:
+        """Return True if the underlying transport connection is currently active."""
         pass
 
     @check_occupied
@@ -360,6 +370,11 @@ class Connection(ABC):
 
     @check_device_type("oneos")
     def patch_config(self, config_path: str) -> None:
+        """Apply a partial configuration to a OneOS6 device (patch, not full reload).
+
+        Args:
+            config_path: Local path to the configuration file to apply.
+        """
         logger.debug(f"Patching config {config_path.split('/')[-1]} ...")
         # If it has beed set as <hostname><prompt_symbol>, just keep the <prompt_symbol>
         # That is to avoid looking for "localhost#" but getting "localhost(config)#" during reconfig
@@ -722,6 +737,11 @@ class SSHConnection(Connection):
     """
 
     def __init__(self, timeout: int = 10):
+        """Initialize an SSH connection.
+
+        Args:
+            timeout: Connection and read timeout in seconds. Defaults to 10.
+        """
         super().__init__(timeout)
         self.ssh_client: Optional[paramiko.SSHClient] = None
         self.ssh_channel: Optional[paramiko.Channel] = None
@@ -941,6 +961,14 @@ class TelnetConnection(Connection):
     """
 
     def __init__(self, timeout: int = 10):
+        """Initialize a Telnet connection.
+
+        Args:
+            timeout: Connection and read timeout in seconds. Defaults to 10.
+
+        .. deprecated::
+            Emit a DeprecationWarning. Migrate to SSHConnection.
+        """
         super().__init__(timeout)
 
         # Issue deprecation warning
@@ -997,6 +1025,15 @@ class TelnetConnection(Connection):
     def _write_credentials(
         self, list_str_to_expect: list[str], str_to_write: str
     ) -> None:
+        """Wait for one of the expected prompts then write the credential string.
+
+        Args:
+            list_str_to_expect: Byte patterns to wait for (e.g. [b"Username:", b"login:"]).
+            str_to_write: Credential string to send (username or password).
+
+        Raises:
+            EOFError: If none of the expected prompts appear within the timeout.
+        """
         if self.resulting_telnet_connection is not None:
             n, match, previous_text = self.resulting_telnet_connection.expect(
                 list_str_to_expect, self.timeout
@@ -1017,6 +1054,11 @@ class TelnetConnection(Connection):
 
     @Connection.check_occupied
     def disconnect(self) -> None:
+        """Close the Telnet connection and free resources.
+
+        Raises:
+            ConnectionError: If the connection could not be fully closed.
+        """
         self.resulting_telnet_connection.close()
         if self.is_connected:
             raise ConnectionError("Connection could not be closed")
@@ -1053,6 +1095,17 @@ class TelnetCLIConnection(Connection):
     """
 
     def __init__(self, source_connection: "TelnetConnection", timeout: int = 10):
+        """Initialize a CLI hop over an existing Telnet connection.
+
+        Args:
+            source_connection: An already-connected TelnetConnection to use as the
+                transport for this hop.
+            timeout: Read timeout in seconds. Defaults to 10.
+
+        Raises:
+            ConnectionError: If source_connection has no underlying telnet object.
+            ConnectionRefusedError: If source_connection is already occupied.
+        """
         super().__init__(timeout)
         self.source_connection = source_connection
         if self.source_connection.resulting_telnet_connection is None:
@@ -1152,6 +1205,7 @@ class TelnetCLIConnection(Connection):
 
     @Connection.check_occupied
     def disconnect(self) -> None:
+        """Exit the CLI hop and release the source connection back to available state."""
         self.exit()
 
     @Connection.check_occupied
@@ -1178,4 +1232,5 @@ class TelnetCLIConnection(Connection):
 
     @property
     def is_connected(self) -> bool:
+        """Return True if the source connection is active and this hop has not been exited."""
         return self.source_connection.is_connected and not self._is_disconnected
