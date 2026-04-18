@@ -222,6 +222,7 @@ def reboot_device(connection: TelnetConnection, timeout: int = 60) -> TelnetConn
         raise ConnectionError("Connection is not established. Cannot reboot device.")
 
     vm_ip = connection.destination_ip
+    assert vm_ip is not None, "destination_ip must be set before rebooting"
     vm = connection.destination_device
     connection.write_command("show expert system command bash")
     connection.write_command("/sbin/reboot")

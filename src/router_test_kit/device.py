@@ -101,7 +101,7 @@ class Device:
         """
         self.username = username
         self.password = password
-        self.hostname = None
+        self.hostname: Optional[str] = None
         self._type = "device"
 
     @property

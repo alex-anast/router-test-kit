@@ -137,7 +137,7 @@ class PluginManager:
 
         try:
             entry_points = importlib.metadata.entry_points()
-            device_plugins = entry_points.select(group=group_name)
+            device_plugins = entry_points.select(group=group_name)  # type: ignore[attr-defined]
         except Exception as e:
             logger.warning(f"Failed to discover entry points: {e}")
             return

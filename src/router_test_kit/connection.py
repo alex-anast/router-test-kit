@@ -45,7 +45,7 @@ import socket
 import time
 import warnings
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Any, Callable, Optional, Union
 
 import paramiko
 
@@ -57,6 +57,51 @@ with warnings.catch_warnings():
     import telnetlib
 
 from router_test_kit.device import Device
+
+# ---------------------------------------------------------------------------
+# Module-level guard decorators
+# These are defined at module level so mypy can type-check them correctly.
+# They operate on any Connection-like object via duck-typing (Any).
+# ---------------------------------------------------------------------------
+
+def _check_occupied(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Raise ConnectionRefusedError if the connection is already in use."""
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        if self._is_occupied:
+            raise ConnectionRefusedError(
+                "This connection is already in use. Please close the connections that use it first."
+            )
+        return func(self, *args, **kwargs)
+    return wrapper
+
+
+def _check_device_type(
+    required_type: str, is_root: bool = False
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """Raise if the connected device is the wrong type or the connection is inactive."""
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+            if self.destination_device.type != required_type:
+                raise ValueError(
+                    f"This method is available only for {required_type} devices, "
+                    f'but the destination device is of type "{self.destination_device.type}".'
+                )
+            if not self.is_connected:
+                raise ConnectionError("Device is not connected")
+            if is_root and not self.is_root:
+                raise PermissionError("Root privileges required to perform this action")
+            return func(self, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def _check_connection(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Raise ConnectionError if the connection is not active."""
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        if not self.is_connected:
+            raise ConnectionError("Device is not connected")
+        return func(self, *args, **kwargs)
+    return wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -100,14 +145,12 @@ class Connection(ABC):
             This is an abstract class and should not be instantiated directly.
             Use concrete implementations like SSHConnection or TelnetConnection.
         """
-        self.destination_device = None
-        self.destination_ip = None
-        self.resulting_telnet_connection = None
+        self.destination_device: Optional[Device] = None
+        self.destination_ip: Optional[str] = None
+        self.resulting_telnet_connection: Optional[Any] = None
         self.timeout = timeout
-        self._is_occupied = (
-            False  # Signifies if the connection is in use by another connection
-        )
-        self.prompt_symbol = None
+        self._is_occupied = False
+        self.prompt_symbol: Optional[str] = None
 
     @abstractmethod
     def connect(
@@ -144,74 +187,7 @@ class Connection(ABC):
         """
         pass
 
-    def check_occupied(func):
-        """
-        Decorator to check if the connection is already in use and hence not available.
-
-        This decorator is used to wrap methods that should not be executed if the connection is already in use.
-
-        Raises:
-            ConnectionRefusedError: If the connection is already in use.
-        """
-
-        def wrapper(self, *args, **kwargs):
-            if self._is_occupied:
-                raise ConnectionRefusedError(
-                    "This connection is already in use. Please close the connections that use it first."
-                )
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    def check_device_type(required_type, is_root: bool = False):
-        """
-        Decorator to check the device type and connection privileges before executing a function.
-
-        Args:
-            required_type (str): The required device type for the function to be executed.
-            is_root (bool, optional): If True, the function requires root privileges to be executed. Defaults to False.
-
-        Raises:
-            ValueError: If the device is not of the required type.
-            ConnectionError: If the device is not connected.
-            PermissionError: If root privileges are required but the user does not have them.
-        """
-
-        def decorator(func):
-            def wrapper(self, *args, **kwargs):
-                if self.destination_device.type != required_type:
-                    raise ValueError(
-                        f'This method is available only for {required_type} devices, but the destination device is of type "{self.destination_device.type}".'
-                    )
-                # Perform the connection check too, since it's a common requirement
-                if not self.is_connected:
-                    raise ConnectionError("Device is not connected")
-                if is_root and not self.is_root:
-                    raise PermissionError(
-                        "Root privileges required to perform this action"
-                    )
-                return func(self, *args, **kwargs)
-
-            return wrapper
-
-        return decorator
-
-    def check_connection(func):
-        """
-        Decorator to check if the device is connected before executing a function.
-
-        Raises:
-            ConnectionError: If the device is not connected.
-        """
-
-        def wrapper(self, *args, **kwargs):
-            if not self.is_connected:
-                raise ConnectionError("Device is not connected")
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    @check_occupied
+    @_check_occupied
     def write_command(
         self,
         command: str,
@@ -239,12 +215,12 @@ class Connection(ABC):
 
         if self.resulting_telnet_connection is not None:
             # If the command is a string, encode it to bytes first
-            command = (
+            encoded_command: bytes = (
                 command.encode("ascii") + b"\r"
                 if hasattr(command, "encode")
-                else command
+                else command  # type: ignore[assignment]
             )
-            self.resulting_telnet_connection.write(command)
+            self.resulting_telnet_connection.write(encoded_command)
             assert self.prompt_symbol is not None, "Prompt symbol is not defined."
 
             # "expect" can wait for multiple patterns
@@ -265,8 +241,8 @@ class Connection(ABC):
             )
         return response
 
-    @check_occupied
-    def flush(self, time_interval: int = 0.1) -> None:
+    @_check_occupied
+    def flush(self, time_interval: float = 0.1) -> None:
         """
         This method waits for a short period of time to allow any remaining data to arrive,
         then reads and discards all data that has arrived at the telnet connection.
@@ -281,8 +257,8 @@ class Connection(ABC):
             )
             raise EOFError from eof
 
-    @check_occupied
-    def flush_deep(self, time_interval: int = 0.1, retries_timeout: int = 60) -> None:
+    @_check_occupied
+    def flush_deep(self, time_interval: float = 0.1, retries_timeout: int = 60) -> None:
         """Flush the connection buffer until the prompt symbol is seen or timeout is reached.
 
         Args:
@@ -309,7 +285,7 @@ class Connection(ABC):
         """Return True if the underlying transport connection is currently active."""
         pass
 
-    @check_occupied
+    @_check_occupied
     def read_until(self, prompt: bytes, timeout: Optional[int] = None) -> Optional[str]:
         """
         Reads data from the telnet connection until a specified prompt is encountered or until timeout.
@@ -332,7 +308,7 @@ class Connection(ABC):
             )
         return response
 
-    @check_device_type("oneos")
+    @_check_device_type("oneos")
     def load_config(self, config_path: str) -> None:
         """
         Loads a configuration file to a OneOS device.
@@ -345,6 +321,7 @@ class Connection(ABC):
             OSError: If the configuration file fails to open (might not exist).
             ConnectionError: If the device is not connected.
         """
+        assert self.destination_device is not None
         logger.debug(f"Loading config {config_path.split('/')[-1]} ...")
         self.write_command("term len 0")
         with open(config_path) as fp:
@@ -370,13 +347,14 @@ class Connection(ABC):
             f"Loaded configuration to device {self.destination_device.hostname}"
         )
 
-    @check_device_type("oneos")
+    @_check_device_type("oneos")
     def patch_config(self, config_path: str) -> None:
         """Apply a partial configuration to a OneOS6 device (patch, not full reload).
 
         Args:
             config_path: Local path to the configuration file to apply.
         """
+        assert self.prompt_symbol is not None
         logger.debug(f"Patching config {config_path.split('/')[-1]} ...")
         # If it has beed set as <hostname><prompt_symbol>, just keep the <prompt_symbol>
         # That is to avoid looking for "localhost#" but getting "localhost(config)#" during reconfig
@@ -384,7 +362,7 @@ class Connection(ABC):
             self.prompt_symbol = self.prompt_symbol[-1]
         self.load_config(config_path)
 
-    @check_device_type("linux")
+    @_check_device_type("linux")
     def set_sudo(self, root_password: Optional[str] = None) -> None:
         """
         Sets sudo privileges for a Linux device.
@@ -398,6 +376,7 @@ class Connection(ABC):
             ConnectionError: If the device is not connected.
             AssertionError: If the method fails to switch to the root user.
         """
+        assert self.destination_device is not None
         if root_password is None:
             root_password = self.destination_device.password
         self.write_command("sudo su", expected_prompt_pattern=[b"password for user:"])
@@ -419,7 +398,7 @@ class Connection(ABC):
         user = self.write_command("whoami", [rb"\$", b"#"]).split()[1].strip()
         return user == "root"
 
-    @check_device_type("linux", is_root=True)
+    @_check_device_type("linux", is_root=True)
     def set_interface_ip(
         self,
         interface_name: str,
@@ -456,7 +435,7 @@ class Connection(ABC):
             f"Interface {interface_name} set to IP {ip_addr} with netmask {netmask} and state {interface_state}"
         )
 
-    @check_device_type("linux", is_root=True)
+    @_check_device_type("linux", is_root=True)
     def delete_interface_ip(
         self, interface_name: str, ip_addr: str, netmask: str = "24"
     ) -> None:
@@ -482,7 +461,7 @@ class Connection(ABC):
             f"IP {ip_addr} with netmask {netmask} deleted from interface {interface_name}"
         )
 
-    def _get_interfaces(self) -> Optional[list[list[str]]]:
+    def _get_interfaces(self) -> list[str]:
         """
         Gets a list of all interfaces on the device.
         """
@@ -491,7 +470,7 @@ class Connection(ABC):
         ]  # Disregard the CLI command
         return interfaces
 
-    def _get_interface(self, interface_name: str):
+    def _get_interface(self, interface_name: str) -> Optional[str]:
         """
         Gets information about a specific interface on the device.
         """
@@ -501,7 +480,7 @@ class Connection(ABC):
                 return interface
         return None
 
-    @check_device_type("oneos")
+    @_check_device_type("oneos")
     def unload_interface(
         self, interface_line: str, wrap_command: bool = True
     ) -> Optional[str]:
@@ -521,7 +500,7 @@ class Connection(ABC):
         self.write_command("end") if wrap_command else None
         return response
 
-    @check_device_type("oneos")
+    @_check_device_type("oneos")
     def unload_config(
         self,
         unload_specific_commands: Optional[list[str]] = None,
@@ -545,6 +524,7 @@ class Connection(ABC):
             ValueError: If the configuration is not fully unloaded and check_is_empty is True, or if device type is not oneos.
             ConnectionError: If the device is not connected.
         """
+        assert self.destination_device is not None
         logger.debug(
             f"Unloading config for device {self.destination_device.hostname} ..."
         )
@@ -572,7 +552,7 @@ class Connection(ABC):
                 # If any of the interfaces listed in permanent_interfaces is a substring of the line
                 if any(
                     interface in line
-                    for interface in self.destination_device.PHYSICAL_INTERFACES_LIST
+                    for interface in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
                 ):
                     self.unload_interface(line, wrap_command=False)
                 else:
@@ -623,6 +603,7 @@ class Connection(ABC):
         """
         Checks if the configuration of the device is fully empty and return boolean.
         """
+        assert self.destination_device is not None
         config_lines = configuration.split("\n")
         if (
             "show running-config" not in config_lines[0]
@@ -635,7 +616,7 @@ class Connection(ABC):
         config_lines = [
             line
             for line in config_lines
-            if all(exception not in line for exception in except_lines)
+            if all(exception not in line for exception in (except_lines or []))
         ]
 
         # Ensure empty interfaces pattern
@@ -645,7 +626,7 @@ class Connection(ABC):
                 line = interface_lines[i].split()
                 if (
                     line[0] != "interface"
-                    or line[1] not in self.destination_device.PHYSICAL_INTERFACES_LIST
+                    or line[1] not in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
                 ):
                     return False
             else:
@@ -653,12 +634,13 @@ class Connection(ABC):
                     return False
         return True
 
-    @check_connection
+    @_check_connection
     def ping(self, ip: str, nbr_packets: int = 1, ping_timeout: int = 1) -> str:
         """
         Sends a ping command to a specified IP address from the device.
         Supports both Linux and OneOS devices.
         """
+        assert self.destination_device is not None
         if self.destination_device.type == "oneos":
             response = self.write_command(
                 f"ping {ip} -n {nbr_packets} -w {ping_timeout}"
@@ -676,7 +658,7 @@ class Connection(ABC):
                 f"Ping not implemented for device type {self.destination_device.type}"
             )
 
-    @check_device_type("linux")
+    @_check_device_type("linux")
     def hping3(
         self,
         destination_ip: str,
@@ -704,7 +686,7 @@ class Connection(ABC):
             full_command += f"--{type} "
         self.write_command(full_command + destination_ip)
 
-    @check_device_type("oneos")
+    @_check_device_type("oneos")
     def reconfigure(self, commands_list: list[str]) -> None:
         """
         Reconfigures a OneOS device with a list of commands.
@@ -748,7 +730,7 @@ class SSHConnection(Connection):
         self.ssh_client: Optional[paramiko.SSHClient] = None
         self.ssh_channel: Optional[paramiko.Channel] = None
 
-    @Connection.check_occupied
+    @_check_occupied
     def connect(
         self, destination_device: "Device", destination_ip: str
     ) -> "Connection":
@@ -815,9 +797,10 @@ class SSHConnection(Connection):
             except socket.timeout:
                 pass  # Expected when no data available
 
-    @Connection.check_occupied
+    @_check_occupied
     def disconnect(self) -> None:
         """Closes the SSH connection and channel."""
+        assert self.destination_device is not None
         if self.ssh_channel:
             self.ssh_channel.close()
             self.ssh_channel = None
@@ -836,15 +819,16 @@ class SSHConnection(Connection):
     @property
     def is_connected(self) -> bool:
         """Check if the SSH connection and channel are active."""
+        transport = self.ssh_client.get_transport() if self.ssh_client is not None else None
         return (
             self.ssh_client is not None
             and self.ssh_channel is not None
             and not self.ssh_channel.closed
-            and self.ssh_client.get_transport() is not None
-            and self.ssh_client.get_transport().is_active()
+            and transport is not None
+            and transport.is_active()
         )
 
-    @Connection.check_occupied
+    @_check_occupied
     def write_command(
         self,
         command: str,
@@ -918,13 +902,13 @@ class SSHConnection(Connection):
 
         return "".join(response_parts) if response_parts else None
 
-    @Connection.check_occupied
+    @_check_occupied
     def flush(self, time_interval: float = 0.1) -> None:
         """Flush any pending data from the SSH channel."""
         time.sleep(time_interval)
         self._flush_channel()
 
-    @Connection.check_occupied
+    @_check_occupied
     def flush_deep(self, time_interval: float = 0.1, retries_timeout: int = 60) -> None:
         """Perform deep flush with retries until prompt appears."""
         logger.debug("SSH deep flushing...")
@@ -983,7 +967,7 @@ class TelnetConnection(Connection):
 
         self.resulting_telnet_connection = telnetlib.Telnet()  # Not connected
 
-    @Connection.check_occupied
+    @_check_occupied
     def connect(self, destination_device: "Device", destination_ip: str) -> Connection:
         """
         First connection from Host Device to any other Device.
@@ -1007,6 +991,8 @@ class TelnetConnection(Connection):
         self.destination_device = destination_device
         self.destination_ip = destination_ip
 
+        assert self.resulting_telnet_connection is not None
+        assert self.prompt_symbol is not None
         self.resulting_telnet_connection.open(
             host=self.destination_ip, timeout=self.timeout
         )
@@ -1025,7 +1011,7 @@ class TelnetConnection(Connection):
         return self
 
     def _write_credentials(
-        self, list_str_to_expect: list[str], str_to_write: str
+        self, list_str_to_expect: list[bytes], str_to_write: Optional[str]
     ) -> None:
         """Wait for one of the expected prompts then write the credential string.
 
@@ -1041,9 +1027,8 @@ class TelnetConnection(Connection):
                 list_str_to_expect, self.timeout
             )
             if n != -1:
-                self.resulting_telnet_connection.write(
-                    str_to_write.encode("ascii") + b"\r"
-                )
+                credential = (str_to_write or "").encode("ascii") + b"\r"
+                self.resulting_telnet_connection.write(credential)
             else:
                 logging.error(
                     f"EOFError: No match found. Match: {match}, Previous text: {previous_text}"
@@ -1054,13 +1039,15 @@ class TelnetConnection(Connection):
                 "No connection object from telnetlib found. It has been closed or was never created."
             )
 
-    @Connection.check_occupied
+    @_check_occupied
     def disconnect(self) -> None:
         """Close the Telnet connection and free resources.
 
         Raises:
             ConnectionError: If the connection could not be fully closed.
         """
+        assert self.resulting_telnet_connection is not None
+        assert self.destination_device is not None
         self.resulting_telnet_connection.close()
         if self.is_connected:
             raise ConnectionError("Connection could not be closed")
@@ -1121,9 +1108,9 @@ class TelnetCLIConnection(Connection):
         self.resulting_telnet_connection = (
             self.source_connection.resulting_telnet_connection
         )
-        self._is_disconnected = True  # For internal use, to monitor when explicitly disconnecting. is_connected checks for the socket only
+        self._is_disconnected: bool = True  # For internal use, to monitor when explicitly disconnecting. is_connected checks for the socket only
 
-    @Connection.check_occupied
+    @_check_occupied
     def connect(self, destination_device: "Device", destination_ip: str) -> Connection:
         """
         This method uses the source device's connection to establish a new Telnet connection to the next destination device.
@@ -1142,12 +1129,13 @@ class TelnetCLIConnection(Connection):
             ConnectionError: If the connection could not be established or if there is an error during the connection process.
         """
         # Will need the info from the source_connection's destination_device until fully connecting (i.e. prompt_symbol)
+        assert self.source_connection.destination_device is not None
         self.destination_device = (
             self.source_connection.destination_device
         )  # pass by reference
         self.prompt_symbol = self.source_connection.prompt_symbol
-        username = destination_device.username
-        password = destination_device.password
+        username = destination_device.username or ""
+        password = destination_device.password or ""
 
         response = self.write_command(
             f"telnet {destination_ip}",
@@ -1205,12 +1193,12 @@ class TelnetCLIConnection(Connection):
             self._is_occupied = False
         return self._is_occupied
 
-    @Connection.check_occupied
+    @_check_occupied
     def disconnect(self) -> None:
         """Exit the CLI hop and release the source connection back to available state."""
         self.exit()
 
-    @Connection.check_occupied
+    @_check_occupied
     def exit(self) -> Union["TelnetConnection", "TelnetCLIConnection"]:
         """
         Exits the current connection, but it doesn't close the socket, just returns to the previous hop.
@@ -1218,6 +1206,7 @@ class TelnetCLIConnection(Connection):
         Returns:
             Union[TelnetConnection, TelnetCLIConnection]: The previous hop's connection object.
         """
+        assert self.source_connection.destination_device is not None
         self.source_connection._is_occupied = False
         # Write "exit" to jump back to previous hop
         self.write_command(
