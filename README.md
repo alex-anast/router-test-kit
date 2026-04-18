@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/alex-anast/router-test-kit/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/alex-anast/router-test-kit/actions)
 [![PyPI version](https://img.shields.io/pypi/v/router-test-kit)](https://pypi.org/project/router-test-kit/)
-[![Python](https://img.shields.io/pypi/pyversions/router-test-kit)](https://pypi.org/project/router-test-kit/)
+[![Python](https://img.shields.io/badge/python-3.9%20–%203.12-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/github/license/alex-anast/router-test-kit)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-mkdocs-blue)](https://alex-anast.github.io/router-test-kit/)
 

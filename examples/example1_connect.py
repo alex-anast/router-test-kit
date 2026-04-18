@@ -7,8 +7,8 @@ This example assumes there is an Ubuntu Server VM up and running.
 See the README for specific details regarding the setup.
 """
 
-from router_test_kit.device import LinuxDevice
 from router_test_kit.connection import SSHConnection
+from router_test_kit.device import LinuxDevice
 
 
 def main():
@@ -29,13 +29,13 @@ def main():
     )
 
     print(f"Connected to VM: {connection.is_connected}")
-    assert(connection.is_connected), "Should have connected to device, check your setup."
+    assert connection.is_connected, "Should have connected to device, check your setup."
 
     print("Disconnecting from device...")
     connection.disconnect()
     print(f"Connected to VM: {connection.is_connected}")
 
-    assert(not connection.is_connected), "Should have disconnected from device."
+    assert not connection.is_connected, "Should have disconnected from device."
 
 
 if __name__ == "__main__":

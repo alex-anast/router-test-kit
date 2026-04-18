@@ -7,8 +7,8 @@ This example assumes there are two Ubuntu Server VMs up and running.
 See the README for specific details regarding the setup.
 """
 
-from router_test_kit.device import LinuxDevice
 from router_test_kit.connection import SSHConnection
+from router_test_kit.device import LinuxDevice
 from router_test_kit.static_utils import get_packet_loss
 
 
@@ -28,14 +28,14 @@ def main():
     print(f"Device 2 of type {vm1.type} registered.")
 
     # Connect to the devices using telnet
-    connection1 = SSHConnection(timeout=10) # Connection from Host to VM1
+    connection1 = SSHConnection(timeout=10)  # Connection from Host to VM1
     connection1 = connection1.connect(
         destination_device=vm1,
         destination_ip="192.168.56.2",  # Assuming subnet /24
     )
     print(f"Connected to VM1: {connection1.is_connected}")
 
-    connection2 = SSHConnection(timeout=10) # Connection from Host to VM2
+    connection2 = SSHConnection(timeout=10)  # Connection from Host to VM2
     connection2 = connection2.connect(
         destination_device=vm2,
         destination_ip="192.168.56.3",  # Assuming subnet /24
@@ -55,14 +55,17 @@ def main():
     print("Checking if ping has been successful...")
     packet_loss = get_packet_loss(ping_response)
 
-    assert (packet_loss == '0'), f"Packet loss should be 0, but it is {packet_loss} instead."
+    assert packet_loss == "0", (
+        f"Packet loss should be 0, but it is {packet_loss} instead."
+    )
 
     print("Ping has been successful. Disconnecting...")
 
     connection1.disconnect()
     connection2.disconnect()
-    assert (connection1.is_connected is False and connection2.is_connected is False), \
+    assert connection1.is_connected is False and connection2.is_connected is False, (
         "Failed to disconnect from VMs."
+    )
 
 
 if __name__ == "__main__":
