@@ -63,6 +63,9 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
+[tool.setuptools.package-data]
+router_test_kit = ["py.typed"]
+
 # Ruff configuration
 [tool.ruff]
 target-version = "py39"
