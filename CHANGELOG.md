@@ -41,6 +41,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All `mypy` errors in `src/` resolved: proper `Optional` annotations on `Connection` attributes, module-level guard decorators with `Callable[..., Any]` typing, `assert` guards before `Optional` attribute access, and targeted `# type: ignore[attr-defined]` comments for OneOS6-only attribute access reached under `@_check_device_type("oneos")`.
 - All `ruff` lint violations resolved across `src/`, `tests/`, and `examples/` (UP035/UP006, E402, B904, E722, B024, B017, F841, I001, B007, E741).
 - `setup_logger()` is now idempotent — repeat calls no longer attach duplicate file handlers.
+- `Connection.is_root` used byte-string patterns (`rb"\$"`, `b"#"`) in `write_command`, which raised `TypeError` when used via `SSHConnection` (response is decoded to `str`). Fixed to use string patterns (`r"\$"`, `"#"`).
+
+### Added (coverage lift)
+- Integration tests for Linux-command paths against the real SSH container (`tests/integration/test_ssh_linux_commands.py`): `is_root`, `_get_interfaces`, `_get_interface`, and polymorphic `ping()`.
+- Integration tests for connection-lifecycle error paths: `_check_occupied` guard, `_check_connection` guard via `write_command` before connect, and `flush()` after a real command.
+- Codecov reporting split into `unit` and `integration` flags for per-tier visibility.
+
+### Changed (coverage lift)
+- Coverage threshold enforced at 80% via `[tool.coverage.report] fail_under = 80`.
+- Deprecated `TelnetConnection` and `TelnetCLIConnection` excluded from coverage measurement via `exclude_also` (scheduled for removal when Python 3.13 drops `telnetlib`).
 
 ## [0.2.0] - 2025-08-09
 
