@@ -105,7 +105,7 @@ class PluginManager:
             "linux": LinuxDevice,
             "oneos6": OneOS6Device,
             "radius": RADIUSServer,
-            "host": HostDevice,  # Special case: doesn't inherit from Device
+            "host": HostDevice,
         }
 
         for name, device_class in builtin_devices.items():
@@ -198,11 +198,6 @@ class PluginManager:
             raise PluginError(
                 f"Plugin '{plugin_name}' must be a class, got {type(device_class)}"
             )
-
-        # Special case for HostDevice which doesn't inherit from Device
-        if plugin_name == "host":
-            logger.debug("Plugin '%s' validation passed (special case)", plugin_name)
-            return
 
         # Check inheritance from Device
         if not issubclass(device_class, Device):

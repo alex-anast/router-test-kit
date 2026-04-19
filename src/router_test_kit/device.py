@@ -250,35 +250,32 @@ class OneOS6Device(Device):
         self.hostname = "localhost"
 
 
-class HostDevice:
+class HostDevice(Device):
     """Local host command execution utility.
 
-    This class provides static methods for executing shell commands on the local
-    host system. It's designed for scenarios where tests need to run commands
-    on the host machine running the test suite.
-
-    The class uses the modern subprocess.run API with proper error handling,
-    timeout support, and flexible output management.
+    Represents the local machine running the test suite. Commands are executed
+    via subprocess rather than a remote transport.
 
     Example:
         ```python
         # Basic command execution
-        result = HostDevice.write_command("echo 'Hello World'")
+        host = HostDevice()
+        result = host.write_command("echo 'Hello World'")
         print(result)  # "Hello World"
-
-        # With error handling
-        result = HostDevice.write_command("nonexistent_command", quiet=True)
-        print(result)  # None (command failed)
-
-        # With logging
-        result = HostDevice.write_command("ls -la", print_response=True)
-        # Logs command execution details
         ```
 
     Note:
-        All methods are static since this class doesn't maintain state.
         Commands are executed with a 30-second timeout by default.
     """
+
+    DEFAULT_USERNAME = ""
+    DEFAULT_PASSWORD = ""
+    DEFAULT_PROMPT_SYMBOL = "$"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._type = "host"
+        self.hostname = "localhost"
 
     @staticmethod
     def write_command(
