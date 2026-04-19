@@ -647,27 +647,21 @@ class Connection(ABC):
 
     @_check_connection
     def ping(self, ip: str, nbr_packets: int = 1, ping_timeout: int = 1) -> str:
-        """
-        Sends a ping command to a specified IP address from the device.
-        Supports both Linux and OneOS devices.
+        """Send a ping command from the device and return the raw output.
+
+        The exact command syntax is determined by the connected device type via
+        Device.ping_command() — no branching on device type here.
+
+        Args:
+            ip: Destination IP address to ping.
+            nbr_packets: Number of ping packets to send.
+            ping_timeout: Per-packet timeout in seconds.
         """
         assert self.destination_device is not None
-        if self.destination_device.type == "oneos":
-            response = self.write_command(
-                f"ping {ip} -n {nbr_packets} -w {ping_timeout}"
-            )
-            logger.info(f"Ping {nbr_packets * 5} packets at IP: {ip}")
-            return response
-        elif self.destination_device.type == "linux":
-            response = self.write_command(
-                f"ping {ip} -c {nbr_packets} -W {ping_timeout}"
-            )
-            logger.info(f"Ping {nbr_packets} packets at IP: {ip}")
-            return response
-        else:
-            raise NotImplementedError(
-                f"Ping not implemented for device type {self.destination_device.type}"
-            )
+        cmd = self.destination_device.ping_command(ip, nbr_packets, ping_timeout)
+        response = self.write_command(cmd) or ""
+        logger.info(f"Ping {nbr_packets} packets at IP: {ip}")
+        return response
 
     @_check_device_type("linux")
     def hping3(

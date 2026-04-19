@@ -113,6 +113,22 @@ class Device:
         """
         return self._type
 
+    def ping_command(
+        self, destination_ip: str, count: int = 1, timeout: int = 1
+    ) -> str:
+        """Return the device-appropriate ping command string.
+
+        Subclasses override this to supply the correct ping syntax for their OS.
+
+        Args:
+            destination_ip: IP address to ping.
+            count: Number of ping packets.
+            timeout: Per-packet timeout in seconds.
+        """
+        raise NotImplementedError(
+            f"ping_command not implemented for device type '{self._type}'"
+        )
+
 
 class LinuxDevice(Device):
     """Linux/Unix-based device implementation.
@@ -159,6 +175,11 @@ class LinuxDevice(Device):
         super().__init__(username, password)
         self._type = "linux"
         self.hostname = f"{self._type}-{username or self.DEFAULT_USERNAME}"
+
+    def ping_command(
+        self, destination_ip: str, count: int = 1, timeout: int = 1
+    ) -> str:
+        return f"ping {destination_ip} -c {count} -W {timeout}"
 
 
 class RADIUSServer(LinuxDevice):
@@ -249,6 +270,11 @@ class OneOS6Device(Device):
         self._type = "oneos"
         self.hostname = "localhost"
 
+    def ping_command(
+        self, destination_ip: str, count: int = 1, timeout: int = 1
+    ) -> str:
+        return f"ping {destination_ip} -n {count} -w {timeout}"
+
 
 class HostDevice(Device):
     """Local host command execution utility.
@@ -276,6 +302,11 @@ class HostDevice(Device):
         super().__init__()
         self._type = "host"
         self.hostname = "localhost"
+
+    def ping_command(
+        self, destination_ip: str, count: int = 1, timeout: int = 1
+    ) -> str:
+        return f"ping {destination_ip} -c {count} -W {timeout}"
 
     @staticmethod
     def write_command(
