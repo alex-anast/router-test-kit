@@ -150,3 +150,15 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
+exclude_also = [
+    # Deprecated: TelnetConnection and TelnetCLIConnection will be removed when
+    # Python 3.13 drops telnetlib. Not covered because migration to SSH is pending.
+    "class TelnetConnection",
+    "class TelnetCLIConnection",
+    # Hardware-gated: OneOS6Mixin and its concrete subclasses require real OneOS6
+    # hardware to exercise. Covered only when RTK_HARDWARE_LAB=1 is set.
+    "class OneOS6Mixin",
+    "class OneOS6SSHConnection",
+    "class OneOS6TelnetConnection",
+]
+fail_under = 80
