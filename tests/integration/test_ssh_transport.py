@@ -99,3 +99,28 @@ class TestSSHTransport:
     def test_connect_unreachable_port_raises(self):
         with pytest.raises(ConnectionAbortedError):
             self.conn.connect(self.device, "127.0.0.1", port=19999)
+
+    # ── decorator guard paths ─────────────────────────────────────────────────
+
+    def test_write_command_before_connect_raises(self):
+        """write_command on an unconnected SSHConnection raises ConnectionError."""
+        with pytest.raises(ConnectionError):
+            self.conn.write_command("echo nope")
+
+    def test_double_connect_raises_occupied(self):
+        """_check_occupied guard raises ConnectionRefusedError when in use."""
+        self.conn.connect(self.device, self.server["host"], port=self.server["port"])
+        self.conn._is_occupied = True
+        try:
+            with pytest.raises(ConnectionRefusedError):
+                self.conn.connect(
+                    self.device, self.server["host"], port=self.server["port"]
+                )
+        finally:
+            self.conn._is_occupied = False  # reset so teardown can disconnect
+
+    def test_flush_after_write_command_noop(self):
+        """flush() drains the channel buffer without raising after a write_command."""
+        self.conn.connect(self.device, self.server["host"], port=self.server["port"])
+        self.conn.write_command("echo settle")
+        self.conn.flush()  # must not raise
