@@ -233,6 +233,11 @@ jobs:
         done
 
     - name: Run integration tests
+      env:
+        RTK_SSH_HOST: localhost
+        RTK_SSH_PORT: "2222"
+        RTK_SSH_USER: testuser
+        RTK_SSH_PASSWORD: testpass
       run: pytest tests/integration/ -v -m integration
 
     - name: Tear down container
