@@ -46,7 +46,13 @@ Version: 0.2.0
 
 import logging
 
-from .connection import Connection, SSHConnection, TelnetConnection
+from .connection import (
+    Connection,
+    OneOS6SSHConnection,
+    OneOS6TelnetConnection,
+    SSHConnection,
+    TelnetConnection,
+)
 from .device import Device, HostDevice, LinuxDevice, OneOS6Device, RADIUSServer
 from .plugins import PluginError, PluginManager, auto_load_plugins, get_plugin_manager
 from .static_utils import get_packet_loss, is_valid_ip, ping, print_banner
@@ -80,6 +86,8 @@ __all__ = [
     "Connection",
     "SSHConnection",
     "TelnetConnection",
+    "OneOS6SSHConnection",
+    "OneOS6TelnetConnection",
     # Utilities
     "print_banner",
     "ping",

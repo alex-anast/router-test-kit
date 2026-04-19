@@ -10,11 +10,17 @@ concrete implementations for different connection types:
 - Connection (ABC): Abstract base class defining the connection interface
 - SSHConnection: Secure SSH connections using paramiko (recommended)
 - TelnetConnection: Legacy telnet connections (deprecated)
+- OneOS6Mixin: OneOS6-specific CLI methods (load_config, patch_config, etc.)
+- OneOS6SSHConnection: SSH + OneOS6 methods combined
+- OneOS6TelnetConnection: Telnet + OneOS6 methods combined (deprecated)
 
 Classes:
     Connection: Abstract base class for all connection types
     SSHConnection: Secure SSH connection implementation
     TelnetConnection: Legacy telnet connection (deprecated)
+    OneOS6Mixin: Mixin providing OneOS6-specific CLI methods
+    OneOS6SSHConnection: SSH connection for OneOS6 devices
+    OneOS6TelnetConnection: Telnet connection for OneOS6 devices (deprecated)
 
 Example:
     Basic SSH connection usage:
@@ -56,7 +62,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
     import telnetlib
 
-from router_test_kit.device import Device
+from router_test_kit.device import Device, OneOS6Device
 
 # ---------------------------------------------------------------------------
 # Module-level guard decorators
@@ -319,60 +325,6 @@ class Connection(ABC):
             )
         return response
 
-    @_check_device_type("oneos")
-    def load_config(self, config_path: str) -> None:
-        """
-        Loads a configuration file to a OneOS device.
-
-        Args:
-            config_path (str): The path to the configuration file.
-
-        Raises:
-            ValueError: If the device is not a OneOS device.
-            OSError: If the configuration file fails to open (might not exist).
-            ConnectionError: If the device is not connected.
-        """
-        assert self.destination_device is not None
-        logger.debug(f"Loading config {config_path.split('/')[-1]} ...")
-        self.write_command("term len 0")
-        with open(config_path) as fp:
-            for line in fp:
-                if line.strip().startswith("!"):
-                    continue  # Skip comment lines
-                if "hostname" in line:
-                    self.destination_device.hostname = line.split()[-1]
-                response = self.write_command(line)
-
-        # Check that prompt has exited config terminal fully. Search for "localhost#" (default) or "<configured_hostname>#"
-        self.prompt_symbol = f"{self.destination_device.hostname}#"
-        response = self.write_command("\n").strip()
-        if response != self.prompt_symbol:
-            logger.warning(
-                f"Loading config might have failed, prompt is not as expected. Received {response} but expected {self.prompt_symbol} instead"
-            )
-            logger.debug(
-                'Sometimes the developer has miscalculated the "exit" commands in the BSA'
-            )
-            self.write_command("end")
-        logger.info(
-            f"Loaded configuration to device {self.destination_device.hostname}"
-        )
-
-    @_check_device_type("oneos")
-    def patch_config(self, config_path: str) -> None:
-        """Apply a partial configuration to a OneOS6 device (patch, not full reload).
-
-        Args:
-            config_path: Local path to the configuration file to apply.
-        """
-        assert self.prompt_symbol is not None
-        logger.debug(f"Patching config {config_path.split('/')[-1]} ...")
-        # If it has beed set as <hostname><prompt_symbol>, just keep the <prompt_symbol>
-        # That is to avoid looking for "localhost#" but getting "localhost(config)#" during reconfig
-        if len(self.prompt_symbol) != 1:
-            self.prompt_symbol = self.prompt_symbol[-1]
-        self.load_config(config_path)
-
     @_check_device_type("linux")
     def set_sudo(self, root_password: Optional[str] = None) -> None:
         """
@@ -491,160 +443,6 @@ class Connection(ABC):
                 return interface
         return None
 
-    @_check_device_type("oneos")
-    def unload_interface(
-        self, interface_line: str, wrap_command: bool = True
-    ) -> Optional[str]:
-        """
-        Resets the configuration of a specified interface to its default settings.
-        OneOS6 WARNING: "By configuring the interface back to default, it is possible that some services will not work any more"
-
-        Args:
-            interface_line (str): The line of the full interface name to reset (i.e. interface gigabitethernet 0/0).
-            wrap_command (bool, optional): If True, the method enters and exits the "configure terminal" command.
-
-        Returns:
-            Optional[str]: The response from the device after sending the 'default' command, or None if there was no response.
-        """
-        self.write_command("config terminal") if wrap_command else None
-        response = self.write_command(f"default {interface_line}")
-        self.write_command("end") if wrap_command else None
-        return response
-
-    @_check_device_type("oneos")
-    def unload_config(
-        self,
-        unload_specific_commands: Optional[list[str]] = None,
-        check_is_empty: bool = False,
-    ) -> None:
-        """
-        Unloads the configuration of the device using a bottom-up approach.
-        The configurations on the bottom of the config inherit properties from the configurations above them.
-
-        Sometimes, even by that approach, some commands cannot be unloaded. In that case, the user must manually unload them,
-            by providing the no-commands in the unload_specific_commands parameter.
-
-        The config is retrieved by the very slow "show running-config" command. If check_is_empty is True,
-            "show running-config" is called again (another couple of seconds wait time), that's why default is to not check.
-
-        Args:
-            unload_specific_commands (Optional[List[str]]): A list of specific commands to unload. Defaults to None.
-            check_is_empty (bool, optional): If True, the method checks if the configuration is empty after unloading. Defaults to False.
-
-        Raises:
-            ValueError: If the configuration is not fully unloaded and check_is_empty is True, or if device type is not oneos.
-            ConnectionError: If the device is not connected.
-        """
-        assert self.destination_device is not None
-        logger.debug(
-            f"Unloading config for device {self.destination_device.hostname} ..."
-        )
-        self.write_command("term len 0")
-        self.flush()
-
-        config_lines = self.write_command("show running-config").split("\n")
-        config_lines_reverse = config_lines[::-1]  # Traverse from bottom to top
-
-        self.prompt_symbol = "#"
-        self.write_command("config terminal")
-
-        # Unload ip routes
-        for line in config_lines_reverse:
-            if re.search(r"^(ip(v6|) (route|host)|aaa authentication login)", line):
-                self.write_command(f"no {line}")
-            elif re.search(r"^radius-server", line):
-                self.write_command(f"no radius-server {line.split(' ')[1]}")
-            if "exit" in line:
-                break
-
-        # Unload interfaces
-        for line in config_lines_reverse:
-            if line.startswith("interface"):
-                # If any of the interfaces listed in permanent_interfaces is a substring of the line
-                if any(
-                    interface in line
-                    for interface in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
-                ):
-                    self.unload_interface(line, wrap_command=False)
-                else:
-                    self.write_command(f"no {line}")
-
-        # Get all the lines until the first interface
-        interface_index = next(
-            (i for i, line in enumerate(config_lines) if line.startswith("interface")),
-            None,
-        )
-        config_lines_until_interfaces = config_lines[:interface_index]
-        # Get all the lines that are not preceded with space -> assumes that they are unloaded as part of the main line unload
-        main_lines = [
-            line
-            for line in config_lines_until_interfaces
-            if (not line.startswith(" ") and "exit" not in line)
-        ]
-        for line in main_lines[:1:-1]:  # Traverse from bottom to top again
-            if "license activate" in line:
-                continue
-            # NOTE: Ignore cases that the "no" prefix will not work, expect the user to manually unload these in the loop below
-            self.write_command(f"no {line}")
-
-        # Finally, if user knows that there are configuration leftovers, unload it manually
-        if unload_specific_commands is not None:
-            for command in unload_specific_commands:
-                self.write_command(command)
-
-        self.write_command("hostname localhost")
-        self.write_command("end")
-        self.flush()
-
-        # NOTE: By default, keep check to False because "show running-config" takes ~4s to return response
-        if check_is_empty and not self.is_config_empty(
-            self.write_command("show running-config")
-        ):
-            logger.error(
-                f"Config not fully unloaded for device {self.destination_device.hostname}"
-            )
-            return
-        logger.info(
-            f"Config unloading effort finished for device {self.destination_device.hostname}"
-        )
-
-    def is_config_empty(
-        self, configuration: str, except_lines: Optional[list[str]] = None
-    ) -> bool:
-        """
-        Checks if the configuration of the device is fully empty and return boolean.
-        """
-        assert self.destination_device is not None
-        config_lines = configuration.split("\n")
-        if (
-            "show running-config" not in config_lines[0]
-            or "localhost#" not in config_lines[-1]
-        ):
-            logger.debug(f"Returned config is not okay: {config_lines}")
-            return False
-
-        # Remove lines that should not be checked (lines in `except_lines` list)
-        config_lines = [
-            line
-            for line in config_lines
-            if all(exception not in line for exception in (except_lines or []))
-        ]
-
-        # Ensure empty interfaces pattern
-        interface_lines = config_lines[1:-1]
-        for i in range(len(interface_lines)):
-            if i % 2 == 0:
-                line = interface_lines[i].split()
-                if (
-                    line[0] != "interface"
-                    or line[1] not in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
-                ):
-                    return False
-            else:
-                if "exit" not in interface_lines[i]:
-                    return False
-        return True
-
     @_check_connection
     def ping(self, ip: str, nbr_packets: int = 1, ping_timeout: int = 1) -> str:
         """Send a ping command from the device and return the raw output.
@@ -690,30 +488,6 @@ class Connection(ABC):
         if type is not None and type.lower() in valid_types:
             full_command += f"--{type} "
         self.write_command(full_command + destination_ip)
-
-    @_check_device_type("oneos")
-    def reconfigure(self, commands_list: list[str]) -> None:
-        """
-        Reconfigures a OneOS device with a list of commands.
-        The list of commands is expected to include the exact commands
-            to be sent to the device, with their "exit" commands.
-
-        Args:
-            commands_list (List[str]): The list of commands to send to the device, excluding the "config terminal" and "end" commands.
-
-        Raises:
-            ValueError: If the device is not a OneOS device.
-            ConnectionError: If the device is not connected.
-        """
-        logger.debug("Reconfiguring device ...")
-        self.write_command("term len 0")
-        self.write_command("config terminal")
-        for command in commands_list:
-            self.write_command(command)
-        self.write_command("end")
-        self.flush()
-        logger.debug(f"reconfig commands: {' | '.join(commands_list)}")
-        logger.info("Device reconfigured")
 
 
 class SSHConnection(Connection):
@@ -1250,3 +1024,268 @@ class TelnetCLIConnection(Connection):
     def is_connected(self) -> bool:
         """Return True if the source connection is active and this hop has not been exited."""
         return self.source_connection.is_connected and not self._is_disconnected
+
+
+class OneOS6Mixin:
+    """OneOS6-specific CLI methods.
+
+    Mix this into a transport class — do not instantiate directly:
+
+    ```python
+    conn = OneOS6SSHConnection(timeout=30)
+    conn.connect(router, "192.168.1.1")
+    conn.load_config("/path/to/config.cfg")
+    ```
+
+    Attributes provided by the transport base (SSHConnection / TelnetConnection):
+        destination_device, prompt_symbol, write_command, flush, is_connected
+    """
+
+    # Narrows the type for mixin code; [misc] at the concrete class is suppressed with type: ignore[misc]
+    destination_device: OneOS6Device  # type: ignore[assignment]
+    prompt_symbol: Optional[str]
+
+    @_check_connection
+    def load_config(self, config_path: str) -> None:
+        """Load a configuration file onto the OneOS6 device.
+
+        Args:
+            config_path: Local path to the configuration file.
+
+        Raises:
+            OSError: If the configuration file cannot be opened.
+            ConnectionError: If the device is not connected.
+        """
+        assert self.destination_device is not None
+        logger.debug(f"Loading config {config_path.split('/')[-1]} ...")
+        self.write_command("term len 0")  # type: ignore[attr-defined]
+        with open(config_path) as fp:
+            for line in fp:
+                if line.strip().startswith("!"):
+                    continue  # Skip comment lines
+                if "hostname" in line:
+                    self.destination_device.hostname = line.split()[-1]
+                self.write_command(line)  # type: ignore[attr-defined]
+
+        # Check that prompt has exited config terminal fully.
+        self.prompt_symbol = f"{self.destination_device.hostname}#"
+        response = self.write_command("\n").strip()  # type: ignore[attr-defined]
+        if response != self.prompt_symbol:
+            logger.warning(
+                f"Loading config might have failed, prompt is not as expected. "
+                f"Received {response} but expected {self.prompt_symbol} instead"
+            )
+            logger.debug(
+                'Sometimes the developer has miscalculated the "exit" commands in the BSA'
+            )
+            self.write_command("end")  # type: ignore[attr-defined]
+        logger.info(
+            f"Loaded configuration to device {self.destination_device.hostname}"
+        )
+
+    @_check_connection
+    def patch_config(self, config_path: str) -> None:
+        """Apply a partial configuration to the OneOS6 device (patch, not full reload).
+
+        Args:
+            config_path: Local path to the configuration file to apply.
+        """
+        assert self.prompt_symbol is not None
+        logger.debug(f"Patching config {config_path.split('/')[-1]} ...")
+        # Keep only the prompt symbol character, not the full "hostname#" prefix.
+        # Avoids looking for "localhost#" but getting "localhost(config)#" during reconfig.
+        if len(self.prompt_symbol) != 1:
+            self.prompt_symbol = self.prompt_symbol[-1]
+        self.load_config(config_path)
+
+    @_check_connection
+    def unload_interface(
+        self, interface_line: str, wrap_command: bool = True
+    ) -> Optional[str]:
+        """Reset a OneOS6 interface configuration to defaults.
+
+        Args:
+            interface_line: Full interface specifier (e.g. "interface gigabitethernet 0/0").
+            wrap_command: Whether to wrap with "config terminal" / "end". Defaults to True.
+
+        Returns:
+            Device response after the 'default' command, or None.
+        """
+        if wrap_command:
+            self.write_command("config terminal")  # type: ignore[attr-defined]
+        response = self.write_command(f"default {interface_line}")  # type: ignore[attr-defined]
+        if wrap_command:
+            self.write_command("end")  # type: ignore[attr-defined]
+        return response
+
+    @_check_connection
+    def unload_config(
+        self,
+        unload_specific_commands: Optional[list[str]] = None,
+        check_is_empty: bool = False,
+    ) -> None:
+        """Unload the OneOS6 device configuration using a bottom-up traversal.
+
+        Args:
+            unload_specific_commands: Extra "no ..." commands for leftovers. Defaults to None.
+            check_is_empty: Whether to verify the config is empty after unloading. Defaults to False.
+
+        Raises:
+            ConnectionError: If the device is not connected.
+        """
+        assert self.destination_device is not None
+        logger.debug(
+            f"Unloading config for device {self.destination_device.hostname} ..."
+        )
+        self.write_command("term len 0")  # type: ignore[attr-defined]
+        self.flush()  # type: ignore[attr-defined]
+
+        config_lines = self.write_command("show running-config").split("\n")  # type: ignore[attr-defined]
+        config_lines_reverse = config_lines[::-1]
+
+        self.prompt_symbol = "#"
+        self.write_command("config terminal")  # type: ignore[attr-defined]
+
+        # Unload ip routes
+        for line in config_lines_reverse:
+            if re.search(r"^(ip(v6|) (route|host)|aaa authentication login)", line):
+                self.write_command(f"no {line}")  # type: ignore[attr-defined]
+            elif re.search(r"^radius-server", line):
+                self.write_command(f"no radius-server {line.split(' ')[1]}")  # type: ignore[attr-defined]
+            if "exit" in line:
+                break
+
+        # Unload interfaces
+        for line in config_lines_reverse:
+            if line.startswith("interface"):
+                if any(
+                    iface in line
+                    for iface in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
+                ):
+                    self.unload_interface(line, wrap_command=False)
+                else:
+                    self.write_command(f"no {line}")  # type: ignore[attr-defined]
+
+        interface_index = next(
+            (i for i, line in enumerate(config_lines) if line.startswith("interface")),
+            None,
+        )
+        config_lines_until_interfaces = config_lines[:interface_index]
+        main_lines = [
+            line
+            for line in config_lines_until_interfaces
+            if (not line.startswith(" ") and "exit" not in line)
+        ]
+        for line in main_lines[:1:-1]:
+            if "license activate" in line:
+                continue
+            self.write_command(f"no {line}")  # type: ignore[attr-defined]
+
+        if unload_specific_commands is not None:
+            for command in unload_specific_commands:
+                self.write_command(command)  # type: ignore[attr-defined]
+
+        self.write_command("hostname localhost")  # type: ignore[attr-defined]
+        self.write_command("end")  # type: ignore[attr-defined]
+        self.flush()  # type: ignore[attr-defined]
+
+        if check_is_empty and not self.is_config_empty(
+            self.write_command("show running-config")  # type: ignore[attr-defined]
+        ):
+            logger.error(
+                f"Config not fully unloaded for device {self.destination_device.hostname}"
+            )
+            return
+        logger.info(
+            f"Config unloading effort finished for device {self.destination_device.hostname}"
+        )
+
+    def is_config_empty(
+        self, configuration: str, except_lines: Optional[list[str]] = None
+    ) -> bool:
+        """Check whether the OneOS6 device configuration has been fully cleared.
+
+        Args:
+            configuration: Output of "show running-config".
+            except_lines: Lines to ignore when checking. Defaults to None.
+
+        Returns:
+            True if configuration is empty, False otherwise.
+        """
+        assert self.destination_device is not None
+        config_lines = configuration.split("\n")
+        if (
+            "show running-config" not in config_lines[0]
+            or "localhost#" not in config_lines[-1]
+        ):
+            logger.debug(f"Returned config is not okay: {config_lines}")
+            return False
+
+        config_lines = [
+            line
+            for line in config_lines
+            if all(exception not in line for exception in (except_lines or []))
+        ]
+
+        interface_lines = config_lines[1:-1]
+        for i in range(len(interface_lines)):
+            if i % 2 == 0:
+                line = interface_lines[i].split()
+                if (
+                    line[0] != "interface"
+                    or line[1] not in self.destination_device.PHYSICAL_INTERFACES_LIST  # type: ignore[attr-defined]
+                ):
+                    return False
+            else:
+                if "exit" not in interface_lines[i]:
+                    return False
+        return True
+
+    @_check_connection
+    def reconfigure(self, commands_list: list[str]) -> None:
+        """Apply a list of OneOS6 CLI commands inside a config-terminal block.
+
+        Args:
+            commands_list: Commands to send (excluding "config terminal" / "end").
+
+        Raises:
+            ConnectionError: If the device is not connected.
+        """
+        logger.debug("Reconfiguring device ...")
+        self.write_command("term len 0")  # type: ignore[attr-defined]
+        self.write_command("config terminal")  # type: ignore[attr-defined]
+        for command in commands_list:
+            self.write_command(command)  # type: ignore[attr-defined]
+        self.write_command("end")  # type: ignore[attr-defined]
+        self.flush()  # type: ignore[attr-defined]
+        logger.debug(f"reconfig commands: {' | '.join(commands_list)}")
+        logger.info("Device reconfigured")
+
+
+class OneOS6SSHConnection(OneOS6Mixin, SSHConnection):  # type: ignore[misc]
+    """SSH connection with OneOS6-specific CLI methods.
+
+    Use this when connecting to a OneOS6 device over SSH.
+
+    Example:
+        ```python
+        from router_test_kit.connection import OneOS6SSHConnection
+        from router_test_kit.device import OneOS6Device
+
+        router = OneOS6Device(username="admin", password="admin")
+        conn = OneOS6SSHConnection(timeout=30)
+        conn.connect(router, "192.168.1.1")
+        conn.load_config("/path/to/config.cfg")
+        conn.disconnect()
+        ```
+    """
+
+
+class OneOS6TelnetConnection(OneOS6Mixin, TelnetConnection):  # type: ignore[misc]
+    """Telnet connection with OneOS6-specific CLI methods.
+
+    Use this when connecting to a OneOS6 device over Telnet (legacy).
+
+    .. deprecated::
+        Prefer OneOS6SSHConnection. Telnet support will be removed in a future version.
+    """
