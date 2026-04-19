@@ -40,6 +40,7 @@ dev = [
     "ruff>=0.9.0",
     "mypy>=1.14.1",
     "types-setuptools",
+    "types-paramiko",
 ]
 docs = [
     "mkdocs>=1.5.0",
