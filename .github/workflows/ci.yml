@@ -3,10 +3,9 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
-  release:
-    types: [ published ]
 
 env:
   PYTHON_VERSION: "3.12"
