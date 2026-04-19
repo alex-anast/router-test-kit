@@ -8,11 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `OneOS6Mixin` holding all OneOS6-specific CLI methods (`load_config`, `patch_config`, `unload_interface`, `unload_config`, `is_config_empty`, `reconfigure`).
+- `OneOS6SSHConnection(OneOS6Mixin, SSHConnection)` — recommended transport for OneOS6 devices over SSH.
+- `OneOS6TelnetConnection(OneOS6Mixin, TelnetConnection)` — Telnet variant (deprecated; prefer SSH).
+- Both new classes exported from `router_test_kit` and listed in `__all__`.
+- `Device.ping_command(ip, count, timeout)` abstract method; overridden in `LinuxDevice`, `OneOS6Device`, and `HostDevice`. Plugin-provided device types get ping support by implementing one method.
 - Pre-commit hooks (`.pre-commit-config.yaml`) running `ruff` (lint + format with auto-fix) and `mypy` on every commit.
 - `examples/advanced_ipsec_test/conftest.py` providing colour codes, path constants, parametrize data, and a `sudo_password` fixture so the legacy IPSec example is runnable out of the box.
 - Architecture overview page (`docs/architecture.md`) describing the Device / Connection / Plugin abstractions, linked from the README and MkDocs nav.
 
 ### Changed
+- `Connection.connect()` signature normalized across all transports: `(device, ip, port: Optional[int] = None)`. Each transport resolves its own default port internally (SSH → 22, Telnet → 23). Fixes Liskov substitution violation.
+- `Connection.ping()` replaced with a polymorphic implementation that delegates to `device.ping_command()`; removes the hardcoded `if device.type == "oneos"` branch.
+- `HostDevice` is now a proper `Device` subclass (was a standalone class). The special-case bypass in `PluginManager._validate_plugin` is removed.
+- OneOS6-specific CLI methods removed from `Connection` base class — use `OneOS6SSHConnection` / `OneOS6TelnetConnection` instead.
 - Python compatibility is now capped at `<3.13` while `telnetlib` is the Telnet backend.
 - Legacy IPSec example (`examples/advanced_ipsec_test/test_ipsec.py`) now imports from the installed `router_test_kit` package instead of the removed `src.*` layout and the `sys.path.insert` hack.
 - Python version badge in README replaced with a static `3.9 – 3.12` badge reflecting `requires-python`.
@@ -23,7 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - `TelnetConnection` and `TelnetCLIConnection` emit a `DeprecationWarning` on instantiation. Migrate to `SSHConnection` for future compatibility.
 
+### Removed
+- `Connection.hping3()` — no callers found in tests or examples.
+- Six OneOS6-specific methods from `Connection` base (`load_config`, `patch_config`, `unload_interface`, `unload_config`, `is_config_empty`, `reconfigure`). Migrate to `OneOS6SSHConnection` / `OneOS6TelnetConnection`.
+
 ### Fixed
+- `reboot_device()` in `static_utils` called `get_packet_loss(vm_ip)` (passing an IP string) instead of `get_packet_loss(ping(vm_ip))`. Packet loss comparison also fixed from `== 0` (int) to `== "0"` (str, matching `get_packet_loss` return type).
 - All `mypy` errors in `src/` resolved: proper `Optional` annotations on `Connection` attributes, module-level guard decorators with `Callable[..., Any]` typing, `assert` guards before `Optional` attribute access, and targeted `# type: ignore[attr-defined]` comments for OneOS6-only attribute access reached under `@_check_device_type("oneos")`.
 - All `ruff` lint violations resolved across `src/`, `tests/`, and `examples/` (UP035/UP006, E402, B904, E722, B024, B017, F841, I001, B007, E741).
 - `setup_logger()` is now idempotent — repeat calls no longer attach duplicate file handlers.
