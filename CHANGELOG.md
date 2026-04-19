@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+## [0.3.0] - 2026-04-19
+
+### Added
 - `OneOS6Mixin` holding all OneOS6-specific CLI methods (`load_config`, `patch_config`, `unload_interface`, `unload_config`, `is_config_empty`, `reconfigure`).
 - `OneOS6SSHConnection(OneOS6Mixin, SSHConnection)` — recommended transport for OneOS6 devices over SSH.
 - `OneOS6TelnetConnection(OneOS6Mixin, TelnetConnection)` — Telnet variant (deprecated; prefer SSH).

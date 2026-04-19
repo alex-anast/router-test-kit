@@ -31,9 +31,28 @@ Device objects carry no connection logic. They expose:
 
 ```
 Connection (ABC)
-├── SSHConnection         – paramiko-based SSH shell session
-├── TelnetConnection      – telnetlib-based Telnet session  ⚠ deprecated, Python <3.13 only
-└── TelnetCLIConnection   – Telnet hop via an existing TelnetConnection
+├── SSHConnection              – paramiko-based SSH shell session
+│   └── OneOS6SSHConnection    – SSHConnection + OneOS6Mixin CLI methods
+├── TelnetConnection           – telnetlib-based Telnet session  ⚠ deprecated
+│   └── OneOS6TelnetConnection – TelnetConnection + OneOS6Mixin CLI methods
+└── TelnetCLIConnection        – Telnet hop via an existing TelnetConnection
+```
+
+### OneOS6Mixin — vendor-specific CLI methods
+
+`OneOS6Mixin` provides six OneOS6-specific methods (`load_config`, `patch_config`, `unload_interface`, `unload_config`, `is_config_empty`, `reconfigure`) that are mixed into concrete connection classes via multiple inheritance:
+
+- `OneOS6SSHConnection(OneOS6Mixin, SSHConnection)` — recommended for OneOS6 devices
+- `OneOS6TelnetConnection(OneOS6Mixin, TelnetConnection)` — deprecated; prefer SSH
+
+```python
+from router_test_kit import OneOS6SSHConnection, OneOS6Device
+
+device = OneOS6Device(username="admin", password="secret")
+conn = OneOS6SSHConnection(timeout=30)
+conn.connect(device, "10.0.0.1")
+conn.load_config("/path/to/config.cfg")
+conn.reconfigure()
 ```
 
 ### Connection lifecycle
