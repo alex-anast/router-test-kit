@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../testing/">
+        <link rel="prev" href="../usage/">
       
       
-        <link rel="next" href="connection/">
+        <link rel="next" href="../testing/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Overview - Router Test Kit</title>
+        <title>Architecture - Router Test Kit</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#api-reference" class="md-skip">
+        <a href="#architecture-overview" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Architecture
             
           </span>
         </div>
@@ -289,9 +289,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../architecture/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -327,13 +329,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
           
   
   
@@ -475,10 +475,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -494,6 +521,170 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Devices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connections
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime decorators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telnetcliconnection-telnet-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TelnetCLIConnection — Telnet hop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin system
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deprecations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deprecations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -529,31 +720,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -571,7 +759,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -586,37 +774,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
         
   
   
@@ -632,109 +793,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#design-principles" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design Principles
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-notice" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Security Notice
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migration-guide" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migration Guide
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -747,7 +805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="connection/" class="md-nav__link">
+      <a href="../api/connection/" class="md-nav__link">
         
   
   
@@ -775,7 +833,7 @@
   
   
     <li class="md-nav__item">
-      <a href="device/" class="md-nav__link">
+      <a href="../api/device/" class="md-nav__link">
         
   
   
@@ -803,7 +861,7 @@
   
   
     <li class="md-nav__item">
-      <a href="static_utils/" class="md-nav__link">
+      <a href="../api/static_utils/" class="md-nav__link">
         
   
   
@@ -858,10 +916,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#devices" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Devices
       
     </span>
   </a>
@@ -869,22 +927,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#connections" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architecture
+        Connections
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Architecture">
+    <nav class="md-nav" aria-label="Connections">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#design-principles" class="md-nav__link">
+  <a href="#connection-lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Design Principles
+        Connection lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime decorators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telnetcliconnection-telnet-hop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TelnetCLIConnection — Telnet hop
       
     </span>
   </a>
@@ -897,10 +977,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#plugin-system" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start
+        Plugin system
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plugin system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end flow
       
     </span>
   </a>
@@ -908,10 +1038,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-notice" class="md-nav__link">
+  <a href="#deprecations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Notice
+        Deprecations
       
     </span>
   </a>
@@ -919,21 +1049,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-guide" class="md-nav__link">
+  <a href="#non-goals" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Migration Guide
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support
+        Non-goals
       
     </span>
   </a>
@@ -958,46 +1077,6 @@
   
 
 
-  <nav class="md-path" aria-label="Navigation" >
-    <ol class="md-path__list">
-      
-        
-  
-  
-    <li class="md-path__item">
-      <a href=".." class="md-path__link">
-        
-  <span class="md-ellipsis">
-    Home
-  </span>
-
-      </a>
-    </li>
-  
-
-      
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="./" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    API Reference
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ol>
-  </nav>
-
               
               <article class="md-content__inner md-typeset">
                 
@@ -1008,72 +1087,121 @@
   
 
 
-<h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
-<p>Welcome to the Router Test Kit API documentation. This section provides comprehensive documentation for all modules, classes, and functions in the router-test-kit framework.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Router Test Kit is organized into several core modules:</p>
+<h1 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h1>
+<p>Router Test Kit is structured around three abstractions: <strong>Devices</strong> (what you're testing), <strong>Connections</strong> (how you talk to them), and <strong>Plugins</strong> (how you extend either). This page walks through each layer and how they fit together.</p>
+<hr />
+<h2 id="devices">Devices<a class="headerlink" href="#devices" title="Permanent link">&para;</a></h2>
+<p>A <code>Device</code> is a plain data container that holds the credentials and identity of a network endpoint.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Device
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── LinuxDevice     – Linux/Unix hosts and VMs (default prompt: $)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── OneOS6Device    – OneOS6 routers/switches   (default prompt: &gt;)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── RADIUSServer – RADIUS-authenticated Linux host
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── HostDevice      – local host (runs commands via subprocess, no network)
+</code></pre></div>
+<p>Device objects carry no connection logic. They expose:</p>
 <ul>
-<li><strong><a href="connection/">Connection</a></strong> - Network connection management (SSH and Telnet)</li>
-<li><strong><a href="device/">Device</a></strong> - Device abstraction and management</li>
-<li><strong><a href="static_utils/">Static Utils</a></strong> - Utility functions and helpers</li>
+<li><code>username</code>, <code>password</code>, <code>hostname</code> – authentication info</li>
+<li><code>DEFAULT_USERNAME</code>, <code>DEFAULT_PASSWORD</code>, <code>DEFAULT_PROMPT_SYMBOL</code> – class-level defaults</li>
 </ul>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>The framework follows a clean separation of concerns:</p>
-<pre class="mermaid"><code>graph TD
-    A[Test Script] --&gt; B[Device Objects]
-    A --&gt; C[Connection Objects]
-    A --&gt; D[Static Utils]
-    B --&gt; C
-    C --&gt; E[Network Device]
-    D --&gt; F[System Commands]</code></pre>
-<h3 id="design-principles">Design Principles<a class="headerlink" href="#design-principles" title="Permanent link">&para;</a></h3>
+<p><code>Connection</code> decorators use <code>isinstance</code> checks against these classes to enforce that a method like <code>set_sudo()</code> is only called on a <code>LinuxDevice</code>, not on a <code>OneOS6Device</code>.</p>
+<hr />
+<h2 id="connections">Connections<a class="headerlink" href="#connections" title="Permanent link">&para;</a></h2>
+<p><code>Connection</code> is an abstract base class (<code>abc.ABC</code>) that defines the interface every transport implementation must follow.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Connection (ABC)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── SSHConnection         – paramiko-based SSH shell session
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── TelnetConnection      – telnetlib-based Telnet session  ⚠ deprecated, Python &lt;3.13 only
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>└── TelnetCLIConnection   – Telnet hop via an existing TelnetConnection
+</code></pre></div>
+<h3 id="connection-lifecycle">Connection lifecycle<a class="headerlink" href="#connection-lifecycle" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>device  = LinuxDevice(username=&quot;admin&quot;, password=&quot;secret&quot;)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>conn    = SSHConnection(timeout=30)
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>conn.connect(device, &quot;10.0.0.1&quot;)   # opens transport, sets prompt_symbol
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>conn.write_command(&quot;show version&quot;)  # sends command, reads until prompt
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>conn.disconnect()                   # closes transport, frees state
+</code></pre></div>
+<p><code>SSHConnection</code> opens an interactive shell channel (not <code>exec_command</code>) so it can handle multi-step interactions like privilege escalation.</p>
+<h3 id="runtime-decorators">Runtime decorators<a class="headerlink" href="#runtime-decorators" title="Permanent link">&para;</a></h3>
+<p>Three decorator functions are defined inside <code>Connection</code> and used by subclasses:</p>
+<table>
+<thead>
+<tr>
+<th>Decorator</th>
+<th>Guards against</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@check_occupied</code></td>
+<td>method called while the connection is already in use by another thread or hop</td>
+</tr>
+<tr>
+<td><code>@check_device_type(type)</code></td>
+<td>method called on the wrong device type (e.g. calling <code>set_sudo</code> on an OneOS6 device)</td>
+</tr>
+<tr>
+<td><code>@check_connection</code></td>
+<td>method called before <code>connect()</code> has been called</td>
+</tr>
+</tbody>
+</table>
+<p>These are applied at the method level rather than subclass level, so each method explicitly declares what it requires. The checks raise <code>ConnectionRefusedError</code>, <code>TypeError</code>, or <code>ConnectionError</code> respectively.</p>
+<h3 id="telnetcliconnection-telnet-hop">TelnetCLIConnection — Telnet hop<a class="headerlink" href="#telnetcliconnection-telnet-hop" title="Permanent link">&para;</a></h3>
+<p><code>TelnetCLIConnection</code> wraps an already-open <code>TelnetConnection</code> and issues a <code>telnet &lt;ip&gt;</code> command through it, acting as a second hop. On <code>disconnect()</code> / <code>exit()</code>, it writes <code>exit</code> to the shell and releases the parent connection back to available state.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>host ──SSH──► router_A ──Telnet──► router_B
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>               TelnetConnection     TelnetCLIConnection
+</code></pre></div>
+<hr />
+<h2 id="plugin-system">Plugin system<a class="headerlink" href="#plugin-system" title="Permanent link">&para;</a></h2>
+<p>The plugin system lets external packages register new device types without modifying the core library. Discovery uses Python's <code>importlib.metadata</code> entry points.</p>
+<h3 id="registration">Registration<a class="headerlink" href="#registration" title="Permanent link">&para;</a></h3>
+<p>External packages declare device classes in their <code>pyproject.toml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;router_test_kit.devices&quot;</span><span class="k">]</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">juniper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rtk_plugin_juniper:JuniperDevice&quot;</span>
+</code></pre></div>
+<p>The registered class must inherit from <code>router_test_kit.device.Device</code>.</p>
+<h3 id="loading">Loading<a class="headerlink" href="#loading" title="Permanent link">&para;</a></h3>
+<p><code>PluginManager</code> is a singleton. On <code>import router_test_kit</code>, <code>auto_load_plugins()</code> calls <code>PluginManager.get_instance().load_plugins()</code>, which:</p>
 <ol>
-<li><strong>Security First</strong>: Modern SSH connections are preferred over legacy Telnet</li>
-<li><strong>Type Safety</strong>: Comprehensive type hints for better IDE support and error prevention</li>
-<li><strong>Error Handling</strong>: Robust error handling with informative exception messages</li>
-<li><strong>Testability</strong>: Extensive unit test coverage with mocking support</li>
-<li><strong>Documentation</strong>: Comprehensive docstrings following Google style</li>
+<li>Calls <code>importlib.metadata.entry_points().select(group="router_test_kit.devices")</code></li>
+<li>For each entry point: loads the class, validates it inherits <code>Device</code>, registers it by name</li>
+<li>Built-in device types (<code>linux</code>, <code>oneos6</code>, <code>radius</code>, <code>host</code>) are registered first in <code>_register_builtin_devices()</code></li>
 </ol>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>Here's a basic example of using the API:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConnection</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinuxDevice</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.static_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ping</span><span class="p">,</span> <span class="n">get_packet_loss</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Create device and connection</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">device</span> <span class="o">=</span> <span class="n">LinuxDevice</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">SSHConnection</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Connect and execute commands</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">conn</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">write_command</span><span class="p">(</span><span class="s2">&quot;show version&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">conn</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># Network utilities</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">ping_result</span> <span class="o">=</span> <span class="n">ping</span><span class="p">(</span><span class="s2">&quot;8.8.8.8&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">packet_loss</span> <span class="o">=</span> <span class="n">get_packet_loss</span><span class="p">(</span><span class="n">ping_result</span><span class="p">)</span>
+<p>Plugin load failures are logged as warnings but do not prevent the package from importing.</p>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_plugin_manager</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">get_plugin_manager</span><span class="p">()</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">devices</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_available_devices</span><span class="p">()</span>   <span class="c1"># dict[str, type[Device]]</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Instantiate by name (if the plugin is installed)</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">juniper</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="s2">&quot;juniper&quot;</span><span class="p">](</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="security-notice">Security Notice<a class="headerlink" href="#security-notice" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Telnet Deprecation</p>
-<p>The TelnetConnection class is deprecated due to security concerns. Telnet transmits data in plain text, making it vulnerable to eavesdropping and man-in-the-middle attacks. </p>
-<p><strong>All new implementations should use SSHConnection for secure communications.</strong></p>
-<p>Telnet support will be removed in a future major version.</p>
-</div>
-<h2 id="migration-guide">Migration Guide<a class="headerlink" href="#migration-guide" title="Permanent link">&para;</a></h2>
-<p>If you're currently using TelnetConnection, migrating to SSHConnection is straightforward:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Old (deprecated)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelnetConnection</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">TelnetConnection</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># New (recommended)  </span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConnection</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">SSHConnection</span><span class="p">()</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># The API is identical for connect(), disconnect(), and write_command()</span>
+<hr />
+<h2 id="end-to-end-flow">End-to-end flow<a class="headerlink" href="#end-to-end-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>1. Instantiate device:      device = LinuxDevice(username=&quot;admin&quot;, password=&quot;pw&quot;)
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>2. Instantiate connection:  conn   = SSHConnection(timeout=30)
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>3. Connect:                 conn.connect(device, &quot;10.0.0.1&quot;)
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>                              └─ sets prompt_symbol from device.DEFAULT_PROMPT_SYMBOL
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>                              └─ flushes welcome banner
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>4. Execute commands:        output = conn.write_command(&quot;ip route show&quot;)
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                              └─ sends bytes over the shell channel
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>                              └─ reads until prompt_symbol appears in recv buffer
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>5. Higher-level helpers:    conn.ping(&quot;10.0.0.2&quot;)   # wraps write_command
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                            conn.set_sudo()           # checks device type first
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>6. Disconnect:              conn.disconnect()
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>                              └─ closes channel and transport
 </code></pre></div>
-<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
-<p>For questions, issues, or contributions, please visit the <a href="https://github.com/alex-anast/router-test-kit">GitHub repository</a>.</p>
+<hr />
+<h2 id="deprecations">Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">&para;</a></h2>
+<p><strong>Telnet support</strong> (<code>TelnetConnection</code>, <code>TelnetCLIConnection</code>) relies on the standard-library <code>telnetlib</code> module, which was removed in Python 3.13. Both classes emit a <code>DeprecationWarning</code> on instantiation. Prefer <code>SSHConnection</code> for all new code. See <code>CHANGELOG.md</code> at the repo root for the migration roadmap.</p>
+<hr />
+<h2 id="non-goals">Non-goals<a class="headerlink" href="#non-goals" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Test orchestration</strong> — Router Test Kit provides device fixtures. Test collection, parameterisation, and reporting are left to pytest.</li>
+<li><strong>Configuration management</strong> — the library can push configs but doesn't store or diff them; that belongs in your test fixtures.</li>
+<li><strong>Async I/O</strong> — all connection methods are synchronous. For concurrent device testing, use pytest-xdist or standard threading at the test layer.</li>
+</ul>
 
 
 

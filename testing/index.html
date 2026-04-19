@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../testing/">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="connection/">
+        <link rel="next" href="../api/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Overview - Router Test Kit</title>
+        <title>Testing - Router Test Kit</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#api-reference" class="md-skip">
+        <a href="#testing" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Testing
             
           </span>
         </div>
@@ -308,9 +308,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../testing/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -327,13 +329,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../api/" class="md-tabs__link">
           
   
   
@@ -502,90 +502,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../testing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Testing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    API Reference
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    API Reference
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
     
   
   
@@ -605,7 +521,7 @@
   <span class="md-ellipsis">
     
   
-    Overview
+    Testing
   
 
     
@@ -623,7 +539,7 @@
   <span class="md-ellipsis">
     
   
-    Overview
+    Testing
   
 
     
@@ -649,10 +565,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#tier-1-unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Tier 1 — Unit tests
       
     </span>
   </a>
@@ -660,38 +576,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#tier-2-integration-tests-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#design-principles" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design Principles
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
+        Tier 2 — Integration tests (Docker)
       
     </span>
   </a>
@@ -699,10 +587,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-notice" class="md-nav__link">
+  <a href="#tier-3-hardware-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Notice
+        Tier 3 — Hardware tests
       
     </span>
   </a>
@@ -710,10 +598,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-guide" class="md-nav__link">
+  <a href="#running-the-full-suite-locally" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Migration Guide
+        Running the full suite locally
       
     </span>
   </a>
@@ -721,10 +609,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
+  <a href="#ci" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Support
+        CI
       
     </span>
   </a>
@@ -738,6 +626,87 @@
     </li>
   
 
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -747,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="connection/" class="md-nav__link">
+      <a href="../api/connection/" class="md-nav__link">
         
   
   
@@ -775,7 +744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="device/" class="md-nav__link">
+      <a href="../api/device/" class="md-nav__link">
         
   
   
@@ -803,7 +772,7 @@
   
   
     <li class="md-nav__item">
-      <a href="static_utils/" class="md-nav__link">
+      <a href="../api/static_utils/" class="md-nav__link">
         
   
   
@@ -858,10 +827,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#tier-1-unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Tier 1 — Unit tests
       
     </span>
   </a>
@@ -869,38 +838,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
+  <a href="#tier-2-integration-tests-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#design-principles" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design Principles
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
+        Tier 2 — Integration tests (Docker)
       
     </span>
   </a>
@@ -908,10 +849,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-notice" class="md-nav__link">
+  <a href="#tier-3-hardware-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Notice
+        Tier 3 — Hardware tests
       
     </span>
   </a>
@@ -919,10 +860,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-guide" class="md-nav__link">
+  <a href="#running-the-full-suite-locally" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Migration Guide
+        Running the full suite locally
       
     </span>
   </a>
@@ -930,10 +871,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
+  <a href="#ci" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Support
+        CI
       
     </span>
   </a>
@@ -958,46 +899,6 @@
   
 
 
-  <nav class="md-path" aria-label="Navigation" >
-    <ol class="md-path__list">
-      
-        
-  
-  
-    <li class="md-path__item">
-      <a href=".." class="md-path__link">
-        
-  <span class="md-ellipsis">
-    Home
-  </span>
-
-      </a>
-    </li>
-  
-
-      
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="./" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    API Reference
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ol>
-  </nav>
-
               
               <article class="md-content__inner md-typeset">
                 
@@ -1008,72 +909,92 @@
   
 
 
-<h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
-<p>Welcome to the Router Test Kit API documentation. This section provides comprehensive documentation for all modules, classes, and functions in the router-test-kit framework.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Router Test Kit is organized into several core modules:</p>
+<h1 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h1>
+<p>The test suite is organised in three tiers. Each tier has a clear contract about what it needs and what it proves.</p>
+<hr />
+<h2 id="tier-1-unit-tests">Tier 1 — Unit tests<a class="headerlink" href="#tier-1-unit-tests" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pytest tests/unit/
+</code></pre></div>
+<p>No network access. No Docker. Mocks are used only where genuinely necessary:</p>
 <ul>
-<li><strong><a href="connection/">Connection</a></strong> - Network connection management (SSH and Telnet)</li>
-<li><strong><a href="device/">Device</a></strong> - Device abstraction and management</li>
-<li><strong><a href="static_utils/">Static Utils</a></strong> - Utility functions and helpers</li>
+<li><strong>Validators and parsers</strong> (<code>is_valid_ip</code>, <code>get_packet_loss</code>, regex helpers) — pure logic, no I/O.</li>
+<li><strong>Edge cases and error paths</strong> — connection guard decorators, channel-closed states, socket errors. These are easier to simulate with a controlled mock than to reproduce deterministically with a real server.</li>
+<li><strong>State machines</strong> — <code>flush</code>, <code>flush_deep</code>, channel buffer draining. Timing-sensitive; mocks let tests be deterministic.</li>
 </ul>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>The framework follows a clean separation of concerns:</p>
-<pre class="mermaid"><code>graph TD
-    A[Test Script] --&gt; B[Device Objects]
-    A --&gt; C[Connection Objects]
-    A --&gt; D[Static Utils]
-    B --&gt; C
-    C --&gt; E[Network Device]
-    D --&gt; F[System Commands]</code></pre>
-<h3 id="design-principles">Design Principles<a class="headerlink" href="#design-principles" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Security First</strong>: Modern SSH connections are preferred over legacy Telnet</li>
-<li><strong>Type Safety</strong>: Comprehensive type hints for better IDE support and error prevention</li>
-<li><strong>Error Handling</strong>: Robust error handling with informative exception messages</li>
-<li><strong>Testability</strong>: Extensive unit test coverage with mocking support</li>
-<li><strong>Documentation</strong>: Comprehensive docstrings following Google style</li>
-</ol>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>Here's a basic example of using the API:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConnection</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinuxDevice</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.static_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ping</span><span class="p">,</span> <span class="n">get_packet_loss</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Create device and connection</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">device</span> <span class="o">=</span> <span class="n">LinuxDevice</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">SSHConnection</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Connect and execute commands</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">conn</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="s2">&quot;192.168.1.1&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">write_command</span><span class="p">(</span><span class="s2">&quot;show version&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">conn</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># Network utilities</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">ping_result</span> <span class="o">=</span> <span class="n">ping</span><span class="p">(</span><span class="s2">&quot;8.8.8.8&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">packet_loss</span> <span class="o">=</span> <span class="n">get_packet_loss</span><span class="p">(</span><span class="n">ping_result</span><span class="p">)</span>
+<p>Everything that is <em>not</em> an edge case or error path belongs in Tier 2.</p>
+<hr />
+<h2 id="tier-2-integration-tests-docker">Tier 2 — Integration tests (Docker)<a class="headerlink" href="#tier-2-integration-tests-docker" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Start the SSH server once per session</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Run the integration suite</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-v<span class="w"> </span>-m<span class="w"> </span>integration
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Tear down</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
 </code></pre></div>
-<h2 id="security-notice">Security Notice<a class="headerlink" href="#security-notice" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Telnet Deprecation</p>
-<p>The TelnetConnection class is deprecated due to security concerns. Telnet transmits data in plain text, making it vulnerable to eavesdropping and man-in-the-middle attacks. </p>
-<p><strong>All new implementations should use SSHConnection for secure communications.</strong></p>
-<p>Telnet support will be removed in a future major version.</p>
-</div>
-<h2 id="migration-guide">Migration Guide<a class="headerlink" href="#migration-guide" title="Permanent link">&para;</a></h2>
-<p>If you're currently using TelnetConnection, migrating to SSHConnection is straightforward:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Old (deprecated)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelnetConnection</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">TelnetConnection</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># New (recommended)  </span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConnection</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">SSHConnection</span><span class="p">()</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># The API is identical for connect(), disconnect(), and write_command()</span>
+<p>These tests connect to a real OpenSSH server running in a local container (<code>linuxserver/openssh-server</code>). They prove:</p>
+<ul>
+<li><code>SSHConnection.connect</code> performs the full TLS + auth handshake</li>
+<li><code>write_command</code> sends bytes over the wire and reads real shell output</li>
+<li><code>disconnect</code> actually closes the socket</li>
+<li>Wrong passwords produce real <code>AuthenticationException</code> errors</li>
+<li>Unreachable hosts produce real <code>socket.error</code></li>
+</ul>
+<p>Container is started once per <code>pytest</code> session by the session-scoped <code>ssh_server</code> fixture in <code>tests/integration/conftest.py</code>. If you already have an SSH server running, override the fixture by setting all four environment variables:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">RTK_SSH_HOST</span><span class="o">=</span>myserver<span class="w"> </span><span class="nv">RTK_SSH_PORT</span><span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="nv">RTK_SSH_USER</span><span class="o">=</span>admin<span class="w"> </span><span class="nv">RTK_SSH_PASSWORD</span><span class="o">=</span>secret<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-m<span class="w"> </span>integration
 </code></pre></div>
-<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
-<p>For questions, issues, or contributions, please visit the <a href="https://github.com/alex-anast/router-test-kit">GitHub repository</a>.</p>
+<hr />
+<h2 id="tier-3-hardware-tests">Tier 3 — Hardware tests<a class="headerlink" href="#tier-3-hardware-tests" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">RTK_HARDWARE_LAB</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pytest<span class="w"> </span>-m<span class="w"> </span>hardware
+</code></pre></div>
+<p>Tests marked <code>@pytest.mark.hardware</code> require a real OneOS6 device on the network. They are <strong>skipped by default</strong> — both locally and in CI. Set <code>RTK_HARDWARE_LAB=1</code> to enable them.</p>
+<p>No hardware tests are currently in the repository. This tier is scaffolded for when the connection layer is refactored to expose a <code>OneOS6Connection</code> class that can be exercised against real kit.</p>
+<hr />
+<h2 id="running-the-full-suite-locally">Running the full suite locally<a class="headerlink" href="#running-the-full-suite-locally" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 1. Create and activate a virtual environment (first time only)</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>pre-commit<span class="w"> </span>install
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="c1"># 2. Unit tests (fast, no Docker required)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>pytest<span class="w"> </span>tests/unit/
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># 3. Integration tests (requires Docker)</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>up<span class="w"> </span>-d
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-m<span class="w"> </span>integration
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.test.yml<span class="w"> </span>down<span class="w"> </span>-v
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="c1"># 4. Full coverage report</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>pytest<span class="w"> </span>tests/<span class="w"> </span>--cov<span class="o">=</span>src<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
+</code></pre></div>
+<hr />
+<h2 id="ci">CI<a class="headerlink" href="#ci" title="Permanent link">&para;</a></h2>
+<p>GitHub Actions runs two test jobs in parallel on every push/PR:</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Runs on</th>
+<th>What it tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test</code></td>
+<td>Python 3.9 – 3.12 matrix</td>
+<td>Unit tests only — no Docker</td>
+</tr>
+<tr>
+<td><code>integration</code></td>
+<td>Python 3.12, ubuntu-latest</td>
+<td>Tier 2 tests against a Docker SSH container</td>
+</tr>
+</tbody>
+</table>
 
 
 
