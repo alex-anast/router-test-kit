@@ -461,34 +461,6 @@ class Connection(ABC):
         logger.info(f"Ping {nbr_packets} packets at IP: {ip}")
         return response
 
-    @_check_device_type("linux")
-    def hping3(
-        self,
-        destination_ip: str,
-        nbr_packets: Optional[int] = None,
-        interval: Optional[str] = None,
-        flood: bool = False,
-        port: Optional[int] = None,
-        type: Optional[str] = None,
-    ) -> None:
-        """
-        Execute hping3 command on the Linux device.
-        For more information about hping3, see https://linux.die.net/man/8/hping3
-        """
-        valid_types = ["tcp", "udp", "icmp", "rawip", "syn", "ack", "fin", "rst"]
-        full_command = "hping3 "
-        if nbr_packets is not None:
-            full_command += f"-c {nbr_packets} "
-        if interval is not None:
-            full_command += f"-i {interval} "
-        if flood:
-            full_command += "--flood "
-        if port is not None:
-            full_command += f"-p {port} "
-        if type is not None and type.lower() in valid_types:
-            full_command += f"--{type} "
-        self.write_command(full_command + destination_ip)
-
 
 class SSHConnection(Connection):
     """
