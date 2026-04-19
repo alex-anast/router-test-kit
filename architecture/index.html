@@ -561,6 +561,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#oneos6mixin-vendor-specific-cli-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OneOS6Mixin — vendor-specific CLI methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#connection-lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -939,6 +950,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#oneos6mixin-vendor-specific-cli-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OneOS6Mixin — vendor-specific CLI methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#connection-lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1108,17 +1130,33 @@
 <h2 id="connections">Connections<a class="headerlink" href="#connections" title="Permanent link">&para;</a></h2>
 <p><code>Connection</code> is an abstract base class (<code>abc.ABC</code>) that defines the interface every transport implementation must follow.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Connection (ABC)
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── SSHConnection         – paramiko-based SSH shell session
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── TelnetConnection      – telnetlib-based Telnet session  ⚠ deprecated, Python &lt;3.13 only
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>└── TelnetCLIConnection   – Telnet hop via an existing TelnetConnection
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── SSHConnection              – paramiko-based SSH shell session
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   └── OneOS6SSHConnection    – SSHConnection + OneOS6Mixin CLI methods
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── TelnetConnection           – telnetlib-based Telnet session  ⚠ deprecated
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   └── OneOS6TelnetConnection – TelnetConnection + OneOS6Mixin CLI methods
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>└── TelnetCLIConnection        – Telnet hop via an existing TelnetConnection
+</code></pre></div>
+<h3 id="oneos6mixin-vendor-specific-cli-methods">OneOS6Mixin — vendor-specific CLI methods<a class="headerlink" href="#oneos6mixin-vendor-specific-cli-methods" title="Permanent link">&para;</a></h3>
+<p><code>OneOS6Mixin</code> provides six OneOS6-specific methods (<code>load_config</code>, <code>patch_config</code>, <code>unload_interface</code>, <code>unload_config</code>, <code>is_config_empty</code>, <code>reconfigure</code>) that are mixed into concrete connection classes via multiple inheritance:</p>
+<ul>
+<li><code>OneOS6SSHConnection(OneOS6Mixin, SSHConnection)</code> — recommended for OneOS6 devices</li>
+<li><code>OneOS6TelnetConnection(OneOS6Mixin, TelnetConnection)</code> — deprecated; prefer SSH</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneOS6SSHConnection</span><span class="p">,</span> <span class="n">OneOS6Device</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">device</span> <span class="o">=</span> <span class="n">OneOS6Device</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">OneOS6SSHConnection</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">conn</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="s2">&quot;10.0.0.1&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">conn</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="s2">&quot;/path/to/config.cfg&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">conn</span><span class="o">.</span><span class="n">reconfigure</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="connection-lifecycle">Connection lifecycle<a class="headerlink" href="#connection-lifecycle" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>device  = LinuxDevice(username=&quot;admin&quot;, password=&quot;secret&quot;)
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>conn    = SSHConnection(timeout=30)
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>conn.connect(device, &quot;10.0.0.1&quot;)   # opens transport, sets prompt_symbol
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>conn.write_command(&quot;show version&quot;)  # sends command, reads until prompt
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>conn.disconnect()                   # closes transport, frees state
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>device  = LinuxDevice(username=&quot;admin&quot;, password=&quot;secret&quot;)
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>conn    = SSHConnection(timeout=30)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>conn.connect(device, &quot;10.0.0.1&quot;)   # opens transport, sets prompt_symbol
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>conn.write_command(&quot;show version&quot;)  # sends command, reads until prompt
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>conn.disconnect()                   # closes transport, frees state
 </code></pre></div>
 <p><code>SSHConnection</code> opens an interactive shell channel (not <code>exec_command</code>) so it can handle multi-step interactions like privilege escalation.</p>
 <h3 id="runtime-decorators">Runtime decorators<a class="headerlink" href="#runtime-decorators" title="Permanent link">&para;</a></h3>
@@ -1148,16 +1186,16 @@
 <p>These are applied at the method level rather than subclass level, so each method explicitly declares what it requires. The checks raise <code>ConnectionRefusedError</code>, <code>TypeError</code>, or <code>ConnectionError</code> respectively.</p>
 <h3 id="telnetcliconnection-telnet-hop">TelnetCLIConnection — Telnet hop<a class="headerlink" href="#telnetcliconnection-telnet-hop" title="Permanent link">&para;</a></h3>
 <p><code>TelnetCLIConnection</code> wraps an already-open <code>TelnetConnection</code> and issues a <code>telnet &lt;ip&gt;</code> command through it, acting as a second hop. On <code>disconnect()</code> / <code>exit()</code>, it writes <code>exit</code> to the shell and releases the parent connection back to available state.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>host ──SSH──► router_A ──Telnet──► router_B
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>               TelnetConnection     TelnetCLIConnection
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>host ──SSH──► router_A ──Telnet──► router_B
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>               TelnetConnection     TelnetCLIConnection
 </code></pre></div>
 <hr />
 <h2 id="plugin-system">Plugin system<a class="headerlink" href="#plugin-system" title="Permanent link">&para;</a></h2>
 <p>The plugin system lets external packages register new device types without modifying the core library. Discovery uses Python's <code>importlib.metadata</code> entry points.</p>
 <h3 id="registration">Registration<a class="headerlink" href="#registration" title="Permanent link">&para;</a></h3>
 <p>External packages declare device classes in their <code>pyproject.toml</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;router_test_kit.devices&quot;</span><span class="k">]</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">juniper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rtk_plugin_juniper:JuniperDevice&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;router_test_kit.devices&quot;</span><span class="k">]</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">juniper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;rtk_plugin_juniper:JuniperDevice&quot;</span>
 </code></pre></div>
 <p>The registered class must inherit from <code>router_test_kit.device.Device</code>.</p>
 <h3 id="loading">Loading<a class="headerlink" href="#loading" title="Permanent link">&para;</a></h3>
@@ -1169,28 +1207,28 @@
 </ol>
 <p>Plugin load failures are logged as warnings but do not prevent the package from importing.</p>
 <h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_plugin_manager</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">get_plugin_manager</span><span class="p">()</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">devices</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_available_devices</span><span class="p">()</span>   <span class="c1"># dict[str, type[Device]]</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Instantiate by name (if the plugin is installed)</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">juniper</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="s2">&quot;juniper&quot;</span><span class="p">](</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">router_test_kit</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_plugin_manager</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">manager</span> <span class="o">=</span> <span class="n">get_plugin_manager</span><span class="p">()</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">devices</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_available_devices</span><span class="p">()</span>   <span class="c1"># dict[str, type[Device]]</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Instantiate by name (if the plugin is installed)</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">juniper</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="s2">&quot;juniper&quot;</span><span class="p">](</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span>
 </code></pre></div>
 <hr />
 <h2 id="end-to-end-flow">End-to-end flow<a class="headerlink" href="#end-to-end-flow" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>1. Instantiate device:      device = LinuxDevice(username=&quot;admin&quot;, password=&quot;pw&quot;)
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>2. Instantiate connection:  conn   = SSHConnection(timeout=30)
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>3. Connect:                 conn.connect(device, &quot;10.0.0.1&quot;)
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>                              └─ sets prompt_symbol from device.DEFAULT_PROMPT_SYMBOL
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>                              └─ flushes welcome banner
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>4. Execute commands:        output = conn.write_command(&quot;ip route show&quot;)
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                              └─ sends bytes over the shell channel
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>                              └─ reads until prompt_symbol appears in recv buffer
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>5. Higher-level helpers:    conn.ping(&quot;10.0.0.2&quot;)   # wraps write_command
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                            conn.set_sudo()           # checks device type first
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>6. Disconnect:              conn.disconnect()
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>                              └─ closes channel and transport
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>1. Instantiate device:      device = LinuxDevice(username=&quot;admin&quot;, password=&quot;pw&quot;)
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>2. Instantiate connection:  conn   = SSHConnection(timeout=30)
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>3. Connect:                 conn.connect(device, &quot;10.0.0.1&quot;)
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>                              └─ sets prompt_symbol from device.DEFAULT_PROMPT_SYMBOL
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>                              └─ flushes welcome banner
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>4. Execute commands:        output = conn.write_command(&quot;ip route show&quot;)
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>                              └─ sends bytes over the shell channel
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>                              └─ reads until prompt_symbol appears in recv buffer
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>5. Higher-level helpers:    conn.ping(&quot;10.0.0.2&quot;)   # wraps write_command
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>                            conn.set_sudo()           # checks device type first
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>6. Disconnect:              conn.disconnect()
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>                              └─ closes channel and transport
 </code></pre></div>
 <hr />
 <h2 id="deprecations">Deprecations<a class="headerlink" href="#deprecations" title="Permanent link">&para;</a></h2>

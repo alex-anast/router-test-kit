@@ -3714,6 +3714,9 @@
 
 <h1 id="connection-api">Connection API<a class="headerlink" href="#connection-api" title="Permanent link">&para;</a></h1>
 <p>The connection module provides network connection management capabilities for communicating with remote devices.</p>
+<p><strong>Recommended transport:</strong> <code>SSHConnection</code> for Linux/Unix devices, <code>OneOS6SSHConnection</code> for OneOS6 routers.</p>
+<p><strong>Deprecated:</strong> <code>TelnetConnection</code> and <code>TelnetCLIConnection</code> rely on <code>telnetlib</code> (removed in Python 3.13). Migrate to SSH equivalents.</p>
+<p><strong>OneOS6 support:</strong> <code>OneOS6Mixin</code> provides vendor-specific CLI methods (<code>load_config</code>, <code>patch_config</code>, <code>unload_interface</code>, <code>unload_config</code>, <code>is_config_empty</code>, <code>reconfigure</code>). These are available through <code>OneOS6SSHConnection</code> and <code>OneOS6TelnetConnection</code>.</p>
 
 
 <div class="doc doc-object doc-module">
