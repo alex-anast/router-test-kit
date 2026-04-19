@@ -163,16 +163,18 @@ class Connection(ABC):
 
     @abstractmethod
     def connect(
-        self, destination_device: "Device", destination_ip: str
+        self,
+        destination_device: "Device",
+        destination_ip: str,
+        port: Optional[int] = None,
     ) -> "Connection":
         """Establish a connection to the specified device.
-
-        This method must be implemented by concrete connection classes to establish
-        the actual network connection to the target device.
 
         Args:
             destination_device: The device object containing connection credentials
             destination_ip: IP address of the target device
+            port: TCP/UDP port to connect to. Defaults to the transport's standard
+                port (22 for SSH, 23 for Telnet) when None.
 
         Returns:
             Connection: This connection instance for method chaining
@@ -741,7 +743,10 @@ class SSHConnection(Connection):
 
     @_check_occupied
     def connect(
-        self, destination_device: "Device", destination_ip: str, port: int = 22
+        self,
+        destination_device: "Device",
+        destination_ip: str,
+        port: Optional[int] = None,
     ) -> "Connection":
         """
         Establishes an SSH connection to the destination device.
@@ -769,7 +774,7 @@ class SSHConnection(Connection):
             # Connect to the device
             self.ssh_client.connect(
                 hostname=destination_ip,
-                port=port,
+                port=port or 22,
                 username=destination_device.username,
                 password=destination_device.password,
                 timeout=self.timeout,
@@ -981,16 +986,19 @@ class TelnetConnection(Connection):
         self.resulting_telnet_connection = telnetlib.Telnet()  # Not connected
 
     @_check_occupied
-    def connect(self, destination_device: "Device", destination_ip: str) -> Connection:
+    def connect(
+        self,
+        destination_device: "Device",
+        destination_ip: str,
+        port: Optional[int] = None,
+    ) -> Connection:
         """
         First connection from Host Device to any other Device.
-        It uses an instantiated telnetlib.Telnet object, which is not connected yet.
-        Returns the resulting Connection object, which carries the now connected telnetlib.Telnet object.
 
         Args:
             destination_device (Device): The device object representing the destination device.
-                                         This object should contain the necessary credentials.
             destination_ip (str): The IP address of the destination device.
+            port (int): TCP port to connect to. Defaults to 23 (standard Telnet port).
 
         Returns:
             Connection: The resulting Connection object, which carries the now connected telnetlib.Telnet object.
@@ -1007,7 +1015,7 @@ class TelnetConnection(Connection):
         assert self.resulting_telnet_connection is not None
         assert self.prompt_symbol is not None
         self.resulting_telnet_connection.open(
-            host=self.destination_ip, timeout=self.timeout
+            host=self.destination_ip, port=port or 0, timeout=self.timeout
         )
         possible_login_prompts = [b"Username:", b"login:"]
         self._write_credentials(possible_login_prompts, destination_device.username)
@@ -1124,17 +1132,22 @@ class TelnetCLIConnection(Connection):
         self._is_disconnected: bool = True  # For internal use, to monitor when explicitly disconnecting. is_connected checks for the socket only
 
     @_check_occupied
-    def connect(self, destination_device: "Device", destination_ip: str) -> Connection:
+    def connect(
+        self,
+        destination_device: "Device",
+        destination_ip: str,
+        port: Optional[int] = None,
+    ) -> Connection:
         """
         This method uses the source device's connection to establish a new Telnet connection to the next destination device.
 
         Args:
             destination_device (Device): The device object representing the destination device.
-                                         This object should contain the necessary credentials.
             destination_ip (str): The IP address of the destination device.
+            port (int): TCP port to connect to via the telnet command. Defaults to standard Telnet port.
 
         Returns:
-            Connection: The resulting Connection object, which carries the now connected telnetlib.Telnet object.
+            Connection: The resulting Connection object.
 
         Raises:
             ConnectionRefusedError: If the connection is refused by the destination device.
@@ -1150,8 +1163,13 @@ class TelnetCLIConnection(Connection):
         username = destination_device.username or ""
         password = destination_device.password or ""
 
+        telnet_cmd = (
+            f"telnet {destination_ip}"
+            if port is None
+            else f"telnet {destination_ip} {port}"
+        )
         response = self.write_command(
-            f"telnet {destination_ip}",
+            telnet_cmd,
             expected_prompt_pattern=[b"Username:", b"login:"],
             timeout=self.timeout,
         )
