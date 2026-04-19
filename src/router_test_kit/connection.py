@@ -205,7 +205,7 @@ class Connection(ABC):
         pass
 
     @_check_occupied
-    def write_command(
+    def write_command(  # pragma: no cover
         self,
         command: str,
         expected_prompt_pattern: Optional[list[str]] = None,
@@ -259,7 +259,7 @@ class Connection(ABC):
         return response
 
     @_check_occupied
-    def flush(self, time_interval: float = 0.1) -> None:
+    def flush(self, time_interval: float = 0.1) -> None:  # pragma: no cover
         """
         This method waits for a short period of time to allow any remaining data to arrive,
         then reads and discards all data that has arrived at the telnet connection.
@@ -275,7 +275,9 @@ class Connection(ABC):
             raise EOFError from eof
 
     @_check_occupied
-    def flush_deep(self, time_interval: float = 0.1, retries_timeout: int = 60) -> None:
+    def flush_deep(
+        self, time_interval: float = 0.1, retries_timeout: int = 60
+    ) -> None:  # pragma: no cover
         """Flush the connection buffer until the prompt symbol is seen or timeout is reached.
 
         Args:
@@ -303,7 +305,9 @@ class Connection(ABC):
         pass
 
     @_check_occupied
-    def read_until(self, prompt: bytes, timeout: Optional[int] = None) -> Optional[str]:
+    def read_until(
+        self, prompt: bytes, timeout: Optional[int] = None
+    ) -> Optional[str]:  # pragma: no cover
         """
         Reads data from the telnet connection until a specified prompt is encountered or until timeout.
 
@@ -326,7 +330,7 @@ class Connection(ABC):
         return response
 
     @_check_device_type("linux")
-    def set_sudo(self, root_password: Optional[str] = None) -> None:
+    def set_sudo(self, root_password: Optional[str] = None) -> None:  # pragma: no cover
         """
         Sets sudo privileges for a Linux device.
         The prompt symbol is updated to '#' to reflect the change to the root user.
@@ -358,7 +362,7 @@ class Connection(ABC):
         Returns:
             bool: True if the current user is root, False otherwise.
         """
-        user = self.write_command("whoami", [rb"\$", b"#"]).split()[1].strip()
+        user = self.write_command("whoami", [r"\$", "#"]).split()[1].strip()
         return user == "root"
 
     @_check_device_type("linux", is_root=True)

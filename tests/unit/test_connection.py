@@ -233,7 +233,7 @@ class TestConnectionLinuxMethods:
 
             result = self.ssh_conn.is_root
             assert result is True
-            mock_write.assert_called_once_with("whoami", [rb"\$", b"#"])
+            mock_write.assert_called_once_with("whoami", [r"\$", "#"])
 
     def test_is_root_property_false(self):
         """Test is_root property when user is not root."""
