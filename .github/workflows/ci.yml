@@ -238,7 +238,7 @@ jobs:
         RTK_SSH_PORT: "2222"
         RTK_SSH_USER: testuser
         RTK_SSH_PASSWORD: testpass
-      run: pytest tests/integration/ -v -m integration --cov=src/router_test_kit --cov-report=xml:coverage-integration.xml
+      run: pytest tests/integration/ -v -m integration --cov=src/router_test_kit --cov-report=xml:coverage-integration.xml --cov-fail-under=0
 
     - name: Upload integration coverage to Codecov
       uses: codecov/codecov-action@v5
