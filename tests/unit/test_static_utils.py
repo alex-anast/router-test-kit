@@ -483,9 +483,10 @@ class TestIsValidIpErrorCases:
 class TestRebootDevice:
     """Test cases for reboot_device function."""
 
+    @patch("router_test_kit.static_utils.ping")
     @patch("router_test_kit.static_utils.get_packet_loss")
     @patch("router_test_kit.static_utils.time")
-    def test_reboot_device_success(self, mock_time, mock_get_packet_loss):
+    def test_reboot_device_success(self, mock_time, mock_get_packet_loss, mock_ping):
         """Test successful device reboot."""
         # Mock connection
         mock_connection = MagicMock()
@@ -493,9 +494,12 @@ class TestRebootDevice:
         mock_connection.destination_ip = "192.168.1.1"
         mock_connection.destination_device = "test_device"
 
-        # Mock time progression
+        # Mock time progression and ping/loss results
         mock_time.time.side_effect = [0, 10, 20]  # Start, check, success
-        mock_get_packet_loss.return_value = 0  # Device is back online
+        mock_ping.return_value = "1 packets transmitted, 1 received, 0% packet loss"
+        mock_get_packet_loss.return_value = (
+            "0"  # Device is back online (str, matching actual return type)
+        )
 
         from router_test_kit.static_utils import reboot_device
 
@@ -525,9 +529,10 @@ class TestRebootDevice:
         with pytest.raises(ConnectionError, match="Connection is not established"):
             reboot_device(None)  # type: ignore
 
+    @patch("router_test_kit.static_utils.ping")
     @patch("router_test_kit.static_utils.get_packet_loss")
     @patch("router_test_kit.static_utils.time")
-    def test_reboot_device_timeout(self, mock_time, mock_get_packet_loss):
+    def test_reboot_device_timeout(self, mock_time, mock_get_packet_loss, mock_ping):
         """Test reboot timeout scenario."""
         mock_connection = MagicMock()
         mock_connection.is_connected = True
@@ -536,7 +541,8 @@ class TestRebootDevice:
 
         # Mock time progression that exceeds timeout
         mock_time.time.side_effect = [0, 30, 70]  # Start, check, timeout exceeded
-        mock_get_packet_loss.return_value = 100  # Device never comes back
+        mock_ping.return_value = "1 packets transmitted, 0 received, 100% packet loss"
+        mock_get_packet_loss.return_value = "100"  # Device never comes back
 
         from router_test_kit.static_utils import reboot_device
 

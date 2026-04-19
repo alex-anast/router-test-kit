@@ -230,8 +230,9 @@ def reboot_device(connection: TelnetConnection, timeout: int = 60) -> TelnetConn
 
     start_time = time.time()
     while True:
-        packet_loss = get_packet_loss(vm_ip)
-        if packet_loss == 0:
+        ping_output = ping(vm_ip)
+        packet_loss = get_packet_loss(ping_output or "")
+        if packet_loss == "0":
             break
         if timeout and time.time() - start_time > timeout:
             raise TimeoutError(f"Rebooting device {vm} took too long. Timeout reached.")
